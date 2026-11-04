@@ -208,6 +208,9 @@ tempCodeRunnerFile.py
 # Ruff stuff:
 .ruff_cache/
 
+# Downloaded resources for notebook lemmatization
+data/nltk_data/
+
 # PyPI configuration file
 .pypirc
 
