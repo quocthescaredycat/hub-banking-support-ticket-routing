@@ -1,0 +1,55 @@
+{
+  "protocol_version": "dev-v1",
+  "registered": "2026-11-07, before any model was fitted",
+  "seed": 42,
+  "split": {
+    "n_folds": 10,
+    "model_val_fold": 0,
+    "routing_val_fold": 1,
+    "near_duplicate_threshold": 0.9,
+    "note": "StratifiedGroupKFold(shuffle=True, random_state=seed); fold 0 = model_val, fold 1 = routing_val, folds 2-9 = fit"
+  },
+  "selection_metric": "macro-F1 over the fixed 77 label IDs on model_val",
+  "lexical": {
+    "word_variants": [
+      "L0_sklearn_default",
+      "L1_normalize_tokenize",
+      "L2_contractions",
+      "L3_numbers",
+      "L4_lemma",
+      "L5_stop_protected",
+      "L6_stop_sklearn"
+    ],
+    "word_ngrams": [[1, 1], [1, 2]],
+    "char_variant": "L3_numbers",
+    "char_ngram": [2, 5],
+    "char_kinds": ["char", "word+char"],
+    "union_word_ngram": [1, 2],
+    "tfidf_fixed": "min_df=1, norm=l2, smooth_idf=True, sublinear_tf=False (not tuned)",
+    "classifiers": ["lr", "svm"],
+    "C_grid": [0.1, 1, 10, 100],
+    "edge_extension": {"below": 0.01, "above": 1000}
+  },
+  "embedding": {
+    "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": null,
+    "revision_note": "null = hub default; the resolved commit is written to the embedding manifest. Pin it here after the first run.",
+    "batch_size": 64,
+    "input": "light_normalize(raw_text) only",
+    "classifiers": ["lr", "svm"],
+    "C_grid": [0.1, 1, 10, 100],
+    "edge_extension": {"below": 0.01, "above": 1000}
+  },
+  "within_family_selection": [
+    "highest model_val macro-F1",
+    "tie (equal after rounding to 4 decimals): fewer TF-IDF features, then smaller C, then grid order",
+    "edge rule: if the winner's C is at the edge of C_grid, fit the same representation once at the edge_extension value; adopt it only if its rounded macro-F1 is strictly higher"
+  ],
+  "deployment_selection": [
+    "highest model_val macro-F1 rounded to 4 decimals among C1-C4",
+    "then lower median warm batch-one latency on the same machine",
+    "then C1, C2, C3, C4 order"
+  ],
+  "bootstrap": {"n_boot": 1000, "seed": 42, "unit": "model_val example"},
+  "latency": {"warmup": 20, "n": 200, "inputs": "model_val rows sorted by row_id"}
+}

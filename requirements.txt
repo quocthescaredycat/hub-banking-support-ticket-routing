@@ -1,0 +1,20 @@
+# Versions below were installed and tested together (Python 3.13, CPU) for the
+# data, preprocessing, lexical (C1/C2) and test stages.
+numpy==2.5.3
+pandas==3.0.5
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+spacy==3.8.18
+# spaCy English model (installed from the official release wheel)
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+matplotlib==3.11.2
+pytest==9.1.1
+nbformat==5.11.1
+nbconvert==7.17.2
+ipykernel==7.4.0
+
+# C3/C4 (frozen MiniLM). Not yet installed/tested together with the pins above:
+# install, run the embeddings stage once, then pin the versions that worked
+# (and the model revision in configs/experiment.json).
+sentence-transformers

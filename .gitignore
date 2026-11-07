@@ -1,0 +1,13 @@
+# downloaded source data (fetched and checksummed by banking_nlp/data.py)
+data/raw/
+# large or machine-specific generated artifacts
+artifacts/models/
+artifacts/embeddings/
+# python / notebooks
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+# personal Claude Code overrides
+.claude/settings.local.json
