@@ -1,0 +1,88 @@
+{
+  "family": "C3",
+  "config_id": "lr|minilm|C=100",
+  "classifier": "lr",
+  "C": 100.0,
+  "representation": {
+    "kind": "minilm",
+    "encoder": {
+      "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "requested_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "resolved_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "embedding_dim": 384,
+      "max_seq_length": 256,
+      "modules": [
+        "Transformer",
+        "Pooling",
+        "Normalize"
+      ],
+      "pooling": [
+        "mean"
+      ],
+      "normalize_module": true,
+      "device": "cuda:0",
+      "sentence_transformers_version": "6.0.0"
+    }
+  },
+  "preprocessing": {
+    "encoder_input": "light_normalize(raw_text) only"
+  },
+  "score_type": "probability (multinomial LR, uncalibrated)",
+  "n_fit_rows": 8003,
+  "n_features": 384,
+  "val_metrics": {
+    "n": 1000,
+    "accuracy": 0.915,
+    "macro_precision": 0.9242614725672522,
+    "macro_recall": 0.9171028318087142,
+    "macro_f1": 0.9183130579050719,
+    "invalid_predictions": 0,
+    "top3_accuracy": 0.976
+  },
+  "val_ci": {
+    "macro_f1_ci": [
+      0.8961749384876191,
+      0.9326648106062926
+    ],
+    "accuracy_ci": [
+      0.897,
+      0.932
+    ]
+  },
+  "fit_seconds": 3.838,
+  "converged": true,
+  "embedding_cache_sha256": "88eb27c881d5f2cca3a06d39a1031dcc9f549d2d7f9da3ad4e15e8827006a3c1",
+  "artifact": "artifacts\\models\\C3.joblib",
+  "artifact_sha256": "873aa228fdcb834801c8106cf6e4cf19d5ba442444e1cbf74e31e6d16fcb2cc6",
+  "artifact_bytes": 120413,
+  "environment": {
+    "python": "3.13.12",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "timestamp_utc": "2026-11-07T15:37:55+00:00",
+    "packages": {
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1",
+      "spacy": "3.8.18",
+      "en_core_web_sm": "3.8.0",
+      "sentence-transformers": "6.0.0",
+      "transformers": "5.12.1",
+      "torch": "2.12.0+cu126",
+      "joblib": "1.5.3",
+      "matplotlib": "3.10.9"
+    },
+    "git_commit": "5672b03d7dbb42df5352cdeb93f03dc6f24228d3"
+  },
+  "config_hash": "f855ee51c3b3",
+  "predictions": {
+    "family": "C3",
+    "class_order": "label_id 0..76 (label_mapping.json)",
+    "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
+    "score_type": "probability (multinomial LR, uncalibrated)",
+    "predictions_sha256": "c49b894b29eb84657ef13a7b9a9d52ab56565db1cc481a766cabb5ea4d50eca9",
+    "config_id": "lr|minilm|C=100"
+  }
+}

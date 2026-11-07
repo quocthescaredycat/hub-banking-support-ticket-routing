@@ -1,0 +1,124 @@
+{
+  "n_test": 3080,
+  "exact_overlap_with_train": 7,
+  "loose_overlap_with_train": 25,
+  "overlap_note": "exact = NFKC + casefold + whitespace key; loose = also ignores punctuation (differences such as '?', hyphens, currency symbols)",
+  "families": {
+    "C1": {
+      "all": {
+        "n": 3080,
+        "accuracy": 0.9055194805194805,
+        "macro_precision": 0.9084555106201301,
+        "macro_recall": 0.9055194805194803,
+        "macro_f1": 0.905555717062523,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9756493506493507
+      },
+      "overlap_excluded_sensitivity": {
+        "n": 3073,
+        "accuracy": 0.9053042629352425,
+        "macro_precision": 0.908246001524479,
+        "macro_recall": 0.9053100408363565,
+        "macro_f1": 0.9053442410490844,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9755938821998047
+      },
+      "loose_overlap_excluded_sensitivity": {
+        "n": 3055,
+        "accuracy": 0.904746317512275,
+        "macro_precision": 0.9076858919203448,
+        "macro_recall": 0.9048010260416274,
+        "macro_f1": 0.904804822803468,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9754500818330606
+      }
+    },
+    "C2": {
+      "all": {
+        "n": 3080,
+        "accuracy": 0.9094155844155845,
+        "macro_precision": 0.9123431621073131,
+        "macro_recall": 0.9094155844155843,
+        "macro_f1": 0.9095093856064682,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9720779220779221
+      },
+      "overlap_excluded_sensitivity": {
+        "n": 3073,
+        "accuracy": 0.9092092417832737,
+        "macro_precision": 0.9121626732508663,
+        "macro_recall": 0.9091973815658028,
+        "macro_f1": 0.9093076279153659,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9720143182557761
+      },
+      "loose_overlap_excluded_sensitivity": {
+        "n": 3055,
+        "accuracy": 0.9086743044189852,
+        "macro_precision": 0.9115289889552509,
+        "macro_recall": 0.908795799021363,
+        "macro_f1": 0.9087766825916916,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9718494271685761
+      }
+    },
+    "C3": {
+      "all": {
+        "n": 3080,
+        "accuracy": 0.9201298701298701,
+        "macro_precision": 0.9224157483211899,
+        "macro_recall": 0.92012987012987,
+        "macro_f1": 0.9198870876610026,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9782467532467533
+      },
+      "overlap_excluded_sensitivity": {
+        "n": 3073,
+        "accuracy": 0.9199479336153595,
+        "macro_precision": 0.9222723153341867,
+        "macro_recall": 0.9199283172967383,
+        "macro_f1": 0.919708789429103,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9781972014318255
+      },
+      "loose_overlap_excluded_sensitivity": {
+        "n": 3055,
+        "accuracy": 0.9194762684124387,
+        "macro_precision": 0.9217679701528809,
+        "macro_recall": 0.9195350597606236,
+        "macro_f1": 0.9192529845262529,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9780687397708674
+      }
+    },
+    "C4": {
+      "all": {
+        "n": 3080,
+        "accuracy": 0.926948051948052,
+        "macro_precision": 0.9296061496284297,
+        "macro_recall": 0.926948051948052,
+        "macro_f1": 0.926728996383478,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9766233766233766
+      },
+      "overlap_excluded_sensitivity": {
+        "n": 3073,
+        "accuracy": 0.9267816465994142,
+        "macro_precision": 0.9295043488343494,
+        "macro_recall": 0.9267802373065531,
+        "macro_f1": 0.9265905798214362,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9765701269118126
+      },
+      "loose_overlap_excluded_sensitivity": {
+        "n": 3055,
+        "accuracy": 0.9263502454991817,
+        "macro_precision": 0.9291119033715179,
+        "macro_recall": 0.9264868798703386,
+        "macro_f1": 0.9262401046093528,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.9764320785597381
+      }
+    }
+  }
+}

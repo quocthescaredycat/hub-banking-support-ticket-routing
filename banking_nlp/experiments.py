@@ -7,8 +7,10 @@ Stages (callable from the notebook, or ``python -m banking_nlp.experiments <stag
   embeddings  C3/C4 grid on frozen MiniLM vectors (needs sentence-transformers and
               access to the Hugging Face hub, or a local copy of the model)
   select      latency on one machine + deployment choice -> artifacts/frozen/selection.json
+  routing     review threshold for the deployed family on routing_val -> artifacts/frozen/routing.json
   final       predictions for C1-C4 on the official test set, then separate scoring.
-              Refuses to run unless selection.json exists and --i-confirm-freeze is given.
+              Refuses to run unless selection.json and a matching routing.json exist and
+              --i-confirm-freeze is given.
 
 The ``routing_val`` partition is never used for fitting or selection here; it is
 reserved for the review threshold of the already-selected classifier (its MiniLM
@@ -93,7 +95,7 @@ def prepare(root: str | Path = ".") -> pd.DataFrame:
     cols = ["row_id", "source_split", "partition", "group_id", "label_id", "label_name",
             "normalized_text_hash", "raw_text"]
     P.data.mkdir(parents=True, exist_ok=True)
-    splits[cols].to_csv(P.splits, index=False)
+    splits[cols].to_csv(P.splits, index=False, lineterminator="\n")
     summary = D.split_summary(splits)
     summary["splits_csv_sha256"] = sha256_file(P.splits)
     summary["config_hash"] = cfg["_hash"]
@@ -161,7 +163,7 @@ def _save_val_predictions(P: Paths, family: str, val: pd.DataFrame, scores: np.n
     })
     P.pred_val.mkdir(parents=True, exist_ok=True)
     csv_path = P.pred_val / f"{family}.csv"
-    df.to_csv(csv_path, index=False)
+    df.to_csv(csv_path, index=False, lineterminator="\n")
     np.save(P.pred_val / f"{family}_scores.npy", scores.astype(np.float32))
     meta = {"family": family, "class_order": "label_id 0..76 (label_mapping.json)",
             "row_order_checksum": row_order_checksum(val.row_id), "score_type": score_type,
@@ -248,7 +250,7 @@ def run_lexical(root: str | Path = ".", verbose: bool = True) -> pd.DataFrame:
         winners[fam] = w
     grid = pd.DataFrame(rows)
     P.dev.mkdir(parents=True, exist_ok=True)
-    grid.to_csv(P.dev / "lexical_grid.csv", index=False)
+    grid.to_csv(P.dev / "lexical_grid.csv", index=False, lineterminator="\n")
     np.savez_compressed(P.dev / "lexical_val_predictions.npz",
                         row_ids=val.row_id.to_numpy(), y_true=y_val,
                         **{k.replace("|", "__").replace(":", "~").replace("=", "-"): v for k, v in preds.items()})
@@ -290,8 +292,9 @@ def run_lexical(root: str | Path = ".", verbose: bool = True) -> pd.DataFrame:
         candidates[fam] = cand
 
     ablation = lexical_ablation(grid, preds, y_val, idx)
-    ablation.to_csv(P.dev / "lexical_ablation.csv", index=False)
-    preprocessing_examples(splits, labels).to_csv(P.dev / "preprocessing_examples.csv", index=False)
+    ablation.to_csv(P.dev / "lexical_ablation.csv", index=False, lineterminator="\n")
+    preprocessing_examples(splits, labels).to_csv(P.dev / "preprocessing_examples.csv", index=False,
+                                                   lineterminator="\n")
     return grid
 
 
@@ -452,7 +455,7 @@ def run_embeddings(root: str | Path = ".", encoder=None, verbose: bool = True) -
         save_json(cand, P.dev / f"candidate_{fam}.json")
     grid = pd.DataFrame(rows)
     P.dev.mkdir(parents=True, exist_ok=True)
-    grid.to_csv(P.dev / "embedding_grid.csv", index=False)
+    grid.to_csv(P.dev / "embedding_grid.csv", index=False, lineterminator="\n")
     return grid
 
 
@@ -497,37 +500,52 @@ def select(root: str | Path = ".", measure_latency: bool = True) -> dict:
 # Stage: final (gated)
 # --------------------------------------------------------------------------------------
 
-def predict_test(root: str | Path = ".", *, i_confirm_configuration_is_frozen: bool = False) -> dict:
-    """Write test predictions for every frozen family. Reads no test labels."""
-    P = Paths(root)
-    sel_path = P.frozen / "selection.json"
+def check_frozen(P: "Paths") -> dict:
+    """Both freezes must exist before any test input is read, and routing.json must
+    have been made from the current selection.json."""
+    sel_path, routing_path = P.frozen / "selection.json", P.frozen / "routing.json"
     if not sel_path.exists():
         raise D.TestSetLockedError("No frozen selection.json; run the 'select' stage first")
-    sel = load_json(sel_path)
+    if not routing_path.exists():
+        raise D.TestSetLockedError("No frozen routing.json; run the 'routing' stage first")
+    routing = load_json(routing_path)
+    if routing.get("selection_sha256") != sha256_file(sel_path):
+        raise D.TestSetLockedError("routing.json was not made from the current selection.json; "
+                                   "re-run the 'routing' stage")
+    return load_json(sel_path)
+
+
+def predict_test(root: str | Path = ".", *, i_confirm_configuration_is_frozen: bool = False) -> dict:
+    """Write test predictions for every frozen family. Reads no test labels.
+
+    All four families are predicted in memory first; files are written only if every
+    family succeeded, so a crash leaves no partial predictions. Any exception (for
+    example an encoder that cannot be loaded) propagates instead of being recorded
+    as 3,080 invalid predictions."""
+    P = Paths(root)
+    sel = check_frozen(P)
     labels = D.load_label_names(P.raw)
-    test = D.load_test_texts(P.raw, i_confirm_configuration_is_frozen=i_confirm_configuration_is_frozen)
-    P.pred_test.mkdir(parents=True, exist_ok=True)
-    written = {}
-    for fam, c in sel["candidates"].items():
+    for fam in sel["candidates"]:
         if (P.pred_test / f"{fam}.csv").exists():
             raise FileExistsError(f"Test predictions for {fam} already exist; the final pass runs once")
+    test = D.load_test_texts(P.raw, i_confirm_configuration_is_frozen=i_confirm_configuration_is_frozen)
+    outputs = {}
+    for fam, c in sel["candidates"].items():
         if sha256_file(P.root / c["artifact"]) != c["artifact_sha256"]:
             raise ValueError(f"{fam} artifact differs from the frozen record")
         pipe = joblib.load(P.root / c["artifact"])
-        try:
-            scores, stype = class_scores(pipe, test.raw_text.tolist())
-            order = np.argsort(-scores, axis=1, kind="stable")
-            pred = order[:, 0]
-            top3 = [" ".join(map(str, o[:3])) for o in order]
-        except Exception as exc:  # recorded as failures, never silently dropped
-            scores, stype = None, f"failed: {exc!r}"
-            pred, top3 = np.full(len(test), -1), [""] * len(test)
+        scores, stype = class_scores(pipe, test.raw_text.tolist())
+        order = np.argsort(-scores, axis=1, kind="stable")
+        pred = order[:, 0]
         df = pd.DataFrame({"row_id": test.row_id, "pred_id": pred,
-                           "pred_name": [labels[i] if i >= 0 else "" for i in pred],
-                           "top3_ids": top3, "score_type": stype})
-        df.to_csv(P.pred_test / f"{fam}.csv", index=False)
-        if scores is not None:
-            np.save(P.pred_test / f"{fam}_scores.npy", scores.astype(np.float32))
+                           "pred_name": [labels[i] for i in pred],
+                           "top3_ids": [" ".join(map(str, o[:3])) for o in order], "score_type": stype})
+        outputs[fam] = (df, scores)
+    P.pred_test.mkdir(parents=True, exist_ok=True)
+    written = {}
+    for fam, (df, scores) in outputs.items():
+        df.to_csv(P.pred_test / f"{fam}.csv", index=False, lineterminator="\n")
+        np.save(P.pred_test / f"{fam}_scores.npy", scores.astype(np.float32))
         written[fam] = sha256_file(P.pred_test / f"{fam}.csv")
     save_json({"predictions_sha256": written, "row_order_checksum": row_order_checksum(test.row_id),
                "environment": environment_info()}, P.pred_test / "manifest.json")
@@ -542,9 +560,18 @@ def score_test(root: str | Path = ".", *, i_confirm_configuration_is_frozen: boo
     answers = D.load_test_labels(P.raw, i_confirm_configuration_is_frozen=i_confirm_configuration_is_frozen)
     test_hash = D.load_test_texts(P.raw, i_confirm_configuration_is_frozen=i_confirm_configuration_is_frozen)[
         ["row_id", "normalized_text_hash"]]
-    train_hashes = set(load_splits(P).normalized_text_hash)
-    overlap = test_hash.normalized_text_hash.isin(train_hashes).to_numpy()
-    results = {"n_test": int(len(answers)), "exact_overlap_with_train": int(overlap.sum()), "families": {}}
+    train = load_splits(P)
+    overlap = test_hash.normalized_text_hash.isin(set(train.normalized_text_hash)).to_numpy()
+    test_texts = D.load_test_texts(P.raw, i_confirm_configuration_is_frozen=i_confirm_configuration_is_frozen)
+    train_loose = set(train.raw_text.map(D.loose_duplicate_key))
+    loose = test_texts.set_index("row_id").loc[answers.row_id, "raw_text"].map(D.loose_duplicate_key) \
+        .isin(train_loose).to_numpy()
+    results = {"n_test": int(len(answers)), "exact_overlap_with_train": int(overlap.sum()),
+               "loose_overlap_with_train": int(loose.sum()),
+               "overlap_note": "exact = NFKC + casefold + whitespace key; loose = also ignores punctuation "
+                               "(differences such as '?', hyphens, currency symbols)",
+               "families": {}}
+    preds = {}
     for fam, sha in manifest["predictions_sha256"].items():
         path = P.pred_test / f"{fam}.csv"
         if sha256_file(path) != sha:
@@ -555,13 +582,32 @@ def score_test(root: str | Path = ".", *, i_confirm_configuration_is_frozen: boo
         y = answers.label_id.to_numpy()
         res = {"all": classification_metrics(y, pred, scores),
                "overlap_excluded_sensitivity": classification_metrics(
-                   y[~overlap], pred[~overlap], None if scores is None else scores[~overlap])}
+                   y[~overlap], pred[~overlap], None if scores is None else scores[~overlap]),
+               "loose_overlap_excluded_sensitivity": classification_metrics(
+                   y[~loose], pred[~loose], None if scores is None else scores[~loose])}
         P.final.mkdir(parents=True, exist_ok=True)
-        per_class_table(y, pred, labels).to_csv(P.final / f"{fam}_per_class.csv", index=False)
-        top_confusions(y, pred, labels, 20).to_csv(P.final / f"{fam}_top_confusions.csv", index=False)
+        per_class_table(y, pred, labels).to_csv(P.final / f"{fam}_per_class.csv", index=False, lineterminator="\n")
+        top_confusions(y, pred, labels, 20).to_csv(P.final / f"{fam}_top_confusions.csv", index=False,
+                                                   lineterminator="\n")
         results["families"][fam] = res
+        preds[fam] = pred
     save_json(results, P.final / "test_metrics.json")
+    save_json(bootstrap_test_uncertainty(answers.label_id.to_numpy(), preds, load_config(P)["bootstrap"]),
+              P.final / "test_ci_and_paired.json")
     return results
+
+
+def bootstrap_test_uncertainty(y: np.ndarray, preds: dict, boot: dict) -> dict:
+    """Percentile bootstrap CIs per family and paired differences for every pair,
+    on one shared set of resamples of the test requests. Key "Cj-Ci" = Cj minus Ci."""
+    idx = bootstrap_indices(len(y), boot["n_boot"], boot["seed"])
+    fams = sorted(preds)
+    return {
+        "bootstrap": {**boot, "unit": "test request", "macro_f1": "averaged over intents present in each resample"},
+        "test_ci": {f: bootstrap_ci(y, preds[f], idx) for f in fams},
+        "test_paired": {f"{b}-{a}": paired_bootstrap_delta(y, preds[a], preds[b], idx)
+                        for i, a in enumerate(fams) for b in fams[i + 1:]},
+    }
 
 
 # --------------------------------------------------------------------------------------
@@ -570,10 +616,10 @@ def score_test(root: str | Path = ".", *, i_confirm_configuration_is_frozen: boo
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("stage", choices=["prepare", "lexical", "embeddings", "select", "final"])
+    ap.add_argument("stage", choices=["prepare", "lexical", "embeddings", "select", "routing", "final"])
     ap.add_argument("--root", default=".")
     ap.add_argument("--i-confirm-freeze", action="store_true",
-                    help="required for 'final': confirms selection.json is frozen")
+                    help="required for 'final': confirms selection.json and routing.json are frozen")
     a = ap.parse_args(argv)
     if a.stage == "prepare":
         prepare(a.root)
@@ -583,9 +629,17 @@ def main(argv=None):
         run_embeddings(a.root)
     elif a.stage == "select":
         print(json.dumps({k: v for k, v in select(a.root).items() if k != "candidates"}, indent=2))
+    elif a.stage == "routing":
+        from .routing import freeze_routing
+
+        print(json.dumps(freeze_routing(a.root), indent=2))
     elif a.stage == "final":
+        from .routing import score_routing_and_slice
+
         predict_test(a.root, i_confirm_configuration_is_frozen=a.i_confirm_freeze)
         print(json.dumps(score_test(a.root, i_confirm_configuration_is_frozen=a.i_confirm_freeze), indent=2))
+        print(json.dumps(score_routing_and_slice(a.root, i_confirm_configuration_is_frozen=a.i_confirm_freeze),
+                         indent=2))
 
 
 if __name__ == "__main__":

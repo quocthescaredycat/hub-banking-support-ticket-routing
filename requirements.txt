@@ -1,10 +1,12 @@
-# Versions below were installed and tested together (Python 3.13, CPU) for the
-# data, preprocessing, lexical (C1/C2) and test stages.
-numpy==2.5.3
-pandas==3.0.5
-scipy==1.18.1
-scikit-learn==1.9.1
-joblib==1.6.0
+# One package set. The numeric/model versions below are the ones that produced the
+# frozen artifacts (Windows 11, Python 3.13, 7 Nov 2026): saved models were pickled
+# with scikit-learn 1.9.0, so load them with that version.
+# The full test suite also passes with this set on Linux (Python 3.13, CPU).
+numpy==2.4.4
+pandas==3.0.2
+scipy==1.17.1
+scikit-learn==1.9.0
+joblib==1.5.3
 spacy==3.8.18
 # spaCy English model (installed from the official release wheel)
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
@@ -14,7 +16,11 @@ nbformat==5.11.1
 nbconvert==7.17.2
 ipykernel==7.4.0
 
-# C3/C4 (frozen MiniLM). Not yet installed/tested together with the pins above:
-# install, run the embeddings stage once, then pin the versions that worked
-# (and the model revision in configs/experiment.json).
-sentence-transformers
+# C3/C4 (frozen MiniLM); model revision pinned in configs/experiment.json.
+sentence-transformers==6.0.0
+transformers==5.12.1
+# The frozen run used the CUDA 12.6 build of torch 2.12.0 (RTX 4060). The plain
+# `pip install` below gives the default PyPI build instead; to match the run, install
+# torch first from PyTorch's CUDA 12.6 package index. CPU vs GPU encoding can change
+# embeddings in the last digits, so C3/C4 test predictions may not be bit-identical.
+torch==2.12.0

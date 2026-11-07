@@ -18,7 +18,7 @@ import numpy as np
 def save_json(obj: Any, path: str | Path) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as fh:
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
         json.dump(obj, fh, indent=2, ensure_ascii=False, sort_keys=False, default=_json_default)
         fh.write("\n")
     return path

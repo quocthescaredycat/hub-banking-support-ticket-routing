@@ -3,6 +3,6 @@
   "class_order": "label_id 0..76 (label_mapping.json)",
   "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
   "score_type": "decision score (LinearSVC margin, not a probability)",
-  "predictions_sha256": "3ae0c7826215b1147519912105639a230f266933dded85e4d8dba3b4033304b4",
+  "predictions_sha256": "fd32e54c7b49d2b91765efa24cc701f5265b84b1105222369f325e9e24834591",
   "config_id": "svm|word12+charwb25:L3_numbers|C=1"
 }

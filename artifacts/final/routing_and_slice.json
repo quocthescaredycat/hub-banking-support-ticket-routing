@@ -1,0 +1,60 @@
+{
+  "slice": {
+    "n": 385,
+    "rule": "5 least similar test rows per true intent to the intent's fitting-partition TF-IDF profile (whitespace tokens, punctuation ignored)"
+  },
+  "families": {
+    "C1": {
+      "difficulty_slice": {
+        "n": 385,
+        "accuracy": 0.6597402597402597,
+        "macro_precision": 0.6925788497217069,
+        "macro_recall": 0.6597402597402596,
+        "macro_f1": 0.6466821481718349,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.8649350649350649
+      }
+    },
+    "C2": {
+      "difficulty_slice": {
+        "n": 385,
+        "accuracy": 0.6675324675324675,
+        "macro_precision": 0.6988043702329416,
+        "macro_recall": 0.6675324675324675,
+        "macro_f1": 0.6525672739958454,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.8571428571428571
+      }
+    },
+    "C3": {
+      "difficulty_slice": {
+        "n": 385,
+        "accuracy": 0.7350649350649351,
+        "macro_precision": 0.7758784505537752,
+        "macro_recall": 0.735064935064935,
+        "macro_f1": 0.7301130687494324,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.8961038961038961
+      }
+    },
+    "C4": {
+      "difficulty_slice": {
+        "n": 385,
+        "accuracy": 0.7402597402597403,
+        "macro_precision": 0.7796897546897548,
+        "macro_recall": 0.7402597402597402,
+        "macro_f1": 0.7363069109822356,
+        "invalid_predictions": 0,
+        "top3_accuracy": 0.8753246753246753
+      }
+    }
+  },
+  "routing_test": {
+    "family": "C1",
+    "threshold": 0.42763846993945637,
+    "n_routed": 2745,
+    "coverage": 0.8912337662337663,
+    "error_rate_routed": 0.04007285974499086,
+    "n_review": 335
+  }
+}

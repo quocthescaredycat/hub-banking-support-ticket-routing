@@ -32,8 +32,8 @@
   },
   "embedding": {
     "model_name": "sentence-transformers/all-MiniLM-L6-v2",
-    "revision": null,
-    "revision_note": "null = hub default; the resolved commit is written to the embedding manifest. Pin it here after the first run.",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "revision_note": "Pinned after the first run (hub commit resolved on 2026-11-07).",
     "batch_size": 64,
     "input": "light_normalize(raw_text) only",
     "classifiers": ["lr", "svm"],

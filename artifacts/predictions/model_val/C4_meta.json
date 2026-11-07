@@ -1,0 +1,8 @@
+{
+  "family": "C4",
+  "class_order": "label_id 0..76 (label_mapping.json)",
+  "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
+  "score_type": "decision score (LinearSVC margin, not a probability)",
+  "predictions_sha256": "3cd5ea0b4d791769cce654131e8e10907a50ed45010041fd9327fe81fed4b8db",
+  "config_id": "svm|minilm|C=1"
+}

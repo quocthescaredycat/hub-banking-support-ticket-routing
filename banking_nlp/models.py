@@ -156,6 +156,19 @@ def n_features(model) -> int | None:
 MINILM = "sentence-transformers/all-MiniLM-L6-v2"
 
 
+def pooling_modes(cfg: dict) -> list[str]:
+    """Pooling modes from a Pooling module config, in either format.
+
+    sentence-transformers >= 6: ``{"pooling_mode": "mean"}`` or a list/tuple of modes.
+    Older versions: one boolean key per mode, e.g. ``{"pooling_mode_mean_tokens": True}``."""
+    mode = cfg.get("pooling_mode")
+    if isinstance(mode, str):
+        return [mode]
+    if isinstance(mode, (list, tuple)):
+        return [str(m) for m in mode]
+    return [k.replace("pooling_mode_", "") for k, v in cfg.items() if k.startswith("pooling_mode_") and v]
+
+
 class SentenceEncoder:
     """Thin wrapper around ``sentence_transformers.SentenceTransformer``.
 
@@ -179,15 +192,15 @@ class SentenceEncoder:
         pooling = None
         for m in self.model:
             if type(m).__name__ == "Pooling":
-                cfg = m.get_config_dict()
-                pooling = [k.replace("pooling_mode_", "") for k, v in cfg.items()
-                           if k.startswith("pooling_mode_") and v]
+                pooling = pooling_modes(m.get_config_dict())
         resolved = None
         try:  # the snapshot folder name in the HF cache is the commit hash
+            from pathlib import Path as _Path
+
             from huggingface_hub import snapshot_download
 
             path = snapshot_download(self.model_name, revision=requested_revision, local_files_only=True)
-            resolved = path.rstrip("/").split("/")[-1]
+            resolved = _Path(path).name  # works for both / and \ separators
         except Exception:
             pass
         import sentence_transformers
@@ -196,7 +209,7 @@ class SentenceEncoder:
             "model_name": self.model_name,
             "requested_revision": requested_revision,
             "resolved_revision": resolved,
-            "embedding_dim": int(self.model.get_sentence_embedding_dimension()),
+            "embedding_dim": int(self._embedding_dimension()),
             "max_seq_length": int(self.model.max_seq_length),
             "modules": modules,
             "pooling": pooling,
@@ -204,6 +217,12 @@ class SentenceEncoder:
             "device": str(self.model.device),
             "sentence_transformers_version": sentence_transformers.__version__,
         }
+
+    def _embedding_dimension(self) -> int:
+        # renamed in sentence-transformers 6 (the old name still works there, with a warning)
+        if hasattr(type(self.model), "get_embedding_dimension"):
+            return self.model.get_embedding_dimension()
+        return self.model.get_sentence_embedding_dimension()
 
     def token_lengths(self, texts: Sequence[str]) -> np.ndarray:
         tok = self.model.tokenizer

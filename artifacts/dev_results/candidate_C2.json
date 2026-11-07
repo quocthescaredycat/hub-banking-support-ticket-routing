@@ -38,7 +38,7 @@
   },
   "val_ci": {
     "macro_f1_ci": [
-      0.8830481430855347,
+      0.885231132012517,
       0.9228754906191687
     ],
     "accuracy_ci": [
@@ -46,46 +46,46 @@
       0.927
     ]
   },
-  "fit_seconds": 2.668,
+  "fit_seconds": 2.368,
   "converged": true,
-  "artifact": "artifacts/models/C2.joblib",
-  "artifact_sha256": "edfc011e904b25e27e49a18e372ddee0aea732bc8f7de305f8515a7bdc3d4497",
-  "artifact_bytes": 20644960,
+  "artifact": "artifacts\\models\\C2.joblib",
+  "artifact_sha256": "737157acc25d4f0afa6b87aabee059f9a46fbcd6eda82024e9685f66f4daa144",
+  "artifact_bytes": 20644976,
   "latency_this_machine": {
     "n": 200,
     "warmup": 20,
-    "p50_ms": 1.2328379999644312,
-    "p95_ms": 2.271556100015459,
-    "mean_ms": 1.401520155009166
+    "p50_ms": 1.2491499655880034,
+    "p95_ms": 1.636909978697075,
+    "mean_ms": 1.3127015007194132
   },
   "environment": {
-    "python": "3.13.18",
-    "platform": "Linux-6.18.44-fc-v300-x86_64-with-glibc2.39",
-    "machine": "x86_64",
-    "processor": "x86_64",
-    "timestamp_utc": "2026-11-07T02:40:43+00:00",
+    "python": "3.13.12",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "timestamp_utc": "2026-11-07T15:34:41+00:00",
     "packages": {
-      "numpy": "2.5.3",
-      "pandas": "3.0.5",
-      "scikit-learn": "1.9.1",
-      "scipy": "1.18.1",
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1",
       "spacy": "3.8.18",
       "en_core_web_sm": "3.8.0",
-      "sentence-transformers": null,
-      "transformers": null,
-      "torch": null,
-      "joblib": "1.6.0",
-      "matplotlib": "3.11.2"
+      "sentence-transformers": "6.0.0",
+      "transformers": "5.12.1",
+      "torch": "2.12.0+cu126",
+      "joblib": "1.5.3",
+      "matplotlib": "3.10.9"
     },
-    "git_commit": null
+    "git_commit": "5672b03d7dbb42df5352cdeb93f03dc6f24228d3"
   },
-  "config_hash": "b7938aa546ed",
+  "config_hash": "f855ee51c3b3",
   "predictions": {
     "family": "C2",
     "class_order": "label_id 0..76 (label_mapping.json)",
     "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
     "score_type": "decision score (LinearSVC margin, not a probability)",
-    "predictions_sha256": "3ae0c7826215b1147519912105639a230f266933dded85e4d8dba3b4033304b4",
+    "predictions_sha256": "fd32e54c7b49d2b91765efa24cc701f5265b84b1105222369f325e9e24834591",
     "config_id": "svm|word12+charwb25:L3_numbers|C=1"
   }
 }

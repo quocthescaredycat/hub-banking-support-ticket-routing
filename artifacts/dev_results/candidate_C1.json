@@ -38,54 +38,54 @@
   },
   "val_ci": {
     "macro_f1_ci": [
-      0.8984866423051093,
-      0.936286348031059
+      0.9016124719820763,
+      0.9366845317166728
     ],
     "accuracy_ci": [
       0.903,
       0.938
     ]
   },
-  "fit_seconds": 15.04,
+  "fit_seconds": 10.798,
   "converged": true,
-  "artifact": "artifacts/models/C1.joblib",
-  "artifact_sha256": "61816ce921513db1e7341ab611e19b0939aea0a46f5c1e55b39d7c1758e14707",
-  "artifact_bytes": 20645076,
+  "artifact": "artifacts\\models\\C1.joblib",
+  "artifact_sha256": "3dd13022dea5bdb355a30c5bc4a5e141ef35c2d30c2a487ec43ed204d7b2c752",
+  "artifact_bytes": 20645092,
   "latency_this_machine": {
     "n": 200,
     "warmup": 20,
-    "p50_ms": 1.1037870000336625,
-    "p95_ms": 1.4821783498291552,
-    "mean_ms": 1.1722011099993779
+    "p50_ms": 1.2206999817863107,
+    "p95_ms": 1.5805649687536054,
+    "mean_ms": 1.2684775012894534
   },
   "environment": {
-    "python": "3.13.18",
-    "platform": "Linux-6.18.44-fc-v300-x86_64-with-glibc2.39",
-    "machine": "x86_64",
-    "processor": "x86_64",
-    "timestamp_utc": "2026-11-07T02:40:38+00:00",
+    "python": "3.13.12",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "timestamp_utc": "2026-11-07T15:34:37+00:00",
     "packages": {
-      "numpy": "2.5.3",
-      "pandas": "3.0.5",
-      "scikit-learn": "1.9.1",
-      "scipy": "1.18.1",
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1",
       "spacy": "3.8.18",
       "en_core_web_sm": "3.8.0",
-      "sentence-transformers": null,
-      "transformers": null,
-      "torch": null,
-      "joblib": "1.6.0",
-      "matplotlib": "3.11.2"
+      "sentence-transformers": "6.0.0",
+      "transformers": "5.12.1",
+      "torch": "2.12.0+cu126",
+      "joblib": "1.5.3",
+      "matplotlib": "3.10.9"
     },
-    "git_commit": null
+    "git_commit": "5672b03d7dbb42df5352cdeb93f03dc6f24228d3"
   },
-  "config_hash": "b7938aa546ed",
+  "config_hash": "f855ee51c3b3",
   "predictions": {
     "family": "C1",
     "class_order": "label_id 0..76 (label_mapping.json)",
     "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
     "score_type": "probability (multinomial LR, uncalibrated)",
-    "predictions_sha256": "8bafaba2eb4a1efe7ecafc97d819f9a01dbb4f49e44a86618f7922c2a3bf48e4",
+    "predictions_sha256": "f40407d58f4bae6f1d66f72eb559609c8da4f96c2dbfef1f65357aa4ed40dcc2",
     "config_id": "lr|word12+charwb25:L3_numbers|C=100"
   }
 }

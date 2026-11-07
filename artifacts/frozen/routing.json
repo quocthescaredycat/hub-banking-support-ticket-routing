@@ -1,0 +1,13 @@
+{
+  "deployment_family": "C1",
+  "score_type": "probability (multinomial LR, uncalibrated)",
+  "signal": "top1 - top2 score margin",
+  "rule": "max coverage s.t. error among routed <= 5% and routed >= 100; ties prefer the larger threshold",
+  "routing_val_rows": 1000,
+  "routing_val_accuracy": 0.902,
+  "threshold": 0.42763846993945637,
+  "n_routed": 890,
+  "coverage": 0.89,
+  "error_rate_routed": 0.04943820224719098,
+  "selection_sha256": "6aeb300e5e7a40413b061cb50e8d2fd645223fb0c51f30a4a6381e15741581aa"
+}

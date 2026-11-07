@@ -55,6 +55,20 @@ def macro_f1(y_true, y_pred, n_labels: int = N_LABELS) -> float:
                                                  average="macro", zero_division=0)[2])
 
 
+def _resample_macro_f1(y_true, y_pred, n_labels: int = N_LABELS) -> float:
+    """Macro-F1 on a bootstrap resample.
+
+    A label that is absent from both the resampled answers and predictions has no
+    defined F1; counting it as 0 (as the fixed 77-label list does) biases every
+    resample that happens to miss a rare intent downwards (intents with 3-4
+    validation requests are missing in ~5% of resamples). Such labels are left out;
+    a label that is predicted but absent from the answers still scores 0."""
+    present = np.union1d(y_true, y_pred)
+    present = present[(present >= 0) & (present < n_labels)]
+    return float(precision_recall_fscore_support(y_true, y_pred, labels=present,
+                                                 average="macro", zero_division=0)[2])
+
+
 def bootstrap_indices(n: int, n_boot: int = 1000, seed: int = 42) -> np.ndarray:
     return np.random.default_rng(seed).integers(0, n, size=(n_boot, n))
 
@@ -62,7 +76,7 @@ def bootstrap_indices(n: int, n_boot: int = 1000, seed: int = 42) -> np.ndarray:
 def bootstrap_ci(y_true, y_pred, idx: np.ndarray, alpha: float = 0.05) -> dict:
     """Percentile bootstrap CI for macro-F1 and accuracy over examples."""
     y_true, y_pred = np.asarray(y_true), np.asarray(y_pred)
-    f1s = np.array([macro_f1(y_true[i], y_pred[i]) for i in idx])
+    f1s = np.array([_resample_macro_f1(y_true[i], y_pred[i]) for i in idx])
     accs = np.array([np.mean(y_true[i] == y_pred[i]) for i in idx])
     lo, hi = 100 * alpha / 2, 100 * (1 - alpha / 2)
     return {"macro_f1_ci": [float(np.percentile(f1s, lo)), float(np.percentile(f1s, hi))],
@@ -73,7 +87,7 @@ def paired_bootstrap_delta(y_true, pred_a, pred_b, idx: np.ndarray, alpha: float
     """Macro-F1(b) - macro-F1(a) on identical resamples (paired)."""
     y_true, pred_a, pred_b = map(np.asarray, (y_true, pred_a, pred_b))
     point = macro_f1(y_true, pred_b) - macro_f1(y_true, pred_a)
-    deltas = np.array([macro_f1(y_true[i], pred_b[i]) - macro_f1(y_true[i], pred_a[i]) for i in idx])
+    deltas = np.array([_resample_macro_f1(y_true[i], pred_b[i]) - _resample_macro_f1(y_true[i], pred_a[i]) for i in idx])
     lo, hi = 100 * alpha / 2, 100 * (1 - alpha / 2)
     return {"delta_macro_f1": float(point),
             "delta_ci": [float(np.percentile(deltas, lo)), float(np.percentile(deltas, hi))],

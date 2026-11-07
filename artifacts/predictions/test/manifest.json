@@ -1,0 +1,30 @@
+{
+  "predictions_sha256": {
+    "C1": "d48dd13d0eea2615ce047aefc96f6e63aaf7bea49e5139666e8d5c28a357bf13",
+    "C2": "d04e37494bda8df998f689c09c7391d33b6111ca5119f0dfe19d87840de4b45d",
+    "C3": "b9c938423beb2cc6ef34e80d9c48681493fca27cdb33300fd6840832be79940f",
+    "C4": "3058a25c81e37bbd96997ff01d0243b9f5dd924188d1fddceb04152d6e726064"
+  },
+  "row_order_checksum": "e74bcb0ef4d3e7c01ed2cb48651cbc6ea04385325328f164612baa74a21ff49d",
+  "environment": {
+    "python": "3.13.12",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "timestamp_utc": "2026-11-07T15:39:20+00:00",
+    "packages": {
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.17.1",
+      "spacy": "3.8.18",
+      "en_core_web_sm": "3.8.0",
+      "sentence-transformers": "6.0.0",
+      "transformers": "5.12.1",
+      "torch": "2.12.0+cu126",
+      "joblib": "1.5.3",
+      "matplotlib": "3.10.9"
+    },
+    "git_commit": "5672b03d7dbb42df5352cdeb93f03dc6f24228d3"
+  }
+}

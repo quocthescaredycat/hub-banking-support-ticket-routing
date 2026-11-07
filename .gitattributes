@@ -1,0 +1,6 @@
+# splits.csv and other checksummed artifacts must keep their exact bytes on every OS
+* text=auto eol=lf
+artifacts/** -text
+*.npy binary
+*.npz binary
+*.png binary

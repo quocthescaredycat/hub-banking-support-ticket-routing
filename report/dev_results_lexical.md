@@ -1,6 +1,8 @@
 # Development results: preprocessing ablation and lexical classifiers (C1/C2)
 
-Run: 7 November 2026 · protocol `configs/experiment.json` (hash `b7938aa546ed`) · 2-vCPU Linux sandbox, Python 3.13, scikit-learn 1.9.1, spaCy 3.8.18.
+Run: 7 November 2026 · protocol `configs/experiment.json` (hash `f855ee51c3b3`, MiniLM revision pinned) · re-run on Windows 11, Python 3.13, scikit-learn 1.9.0, spaCy 3.8.18. The first run (hash `b7938aa546ed`, Linux sandbox) reproduced to the last digit for 122 of 129 fits; 7 SVM fits at `C` ≥ 10 on unigrams differ by at most 0.0023 (liblinear numerics), none of them a winner.
+
+**Correction (review, 7 Nov).** Bootstrap intervals in the first version counted an intent that is absent from a resample (intents with 3–4 validation requests are missing in ~5% of resamples) as F1 = 0, which pulled every interval down (C1: [0.898, 0.936] → corrected [0.902, 0.937]). All intervals below use the corrected resampling. Final test results: [`results_full.md`](results_full.md).
 
 **Scope.** All numbers below are on the **model-validation partition (1,000 requests, 3–18 per intent)** of official training. Models were fitted on the fitting partition (8,003 requests). The routing-validation partition and the official test set were not used. These are development numbers for choosing a configuration, not final results, and they are optimistic for the selected configuration because it was chosen on this same partition.
 
@@ -23,15 +25,15 @@ Each row is the best setting of that variant over n-grams and `C` ∈ {0.1, 1, 1
 
 | Step | LR macro-F1 [95% CI] | LR Δ vs comparison [95% CI] | SVM macro-F1 [95% CI] | SVM Δ vs comparison [95% CI] |
 | --- | --- | --- | --- | --- |
-| L0 sklearn defaults on raw text | 0.882 [0.851, 0.898] | – | 0.876 [0.847, 0.892] | – |
-| L1 normalize + regex tokenizer (vs L0) | 0.888 [0.858, 0.904] | +0.006 [−0.005, +0.017] | 0.886 [0.859, 0.901] | +0.010 [−0.001, +0.022] |
-| L2 + negation/contractions (vs L1) | 0.889 [0.861, 0.904] | +0.000 [−0.019, +0.022] | 0.888 [0.861, 0.903] | +0.002 [−0.005, +0.008] |
-| L3 + number placeholder (vs L2) | 0.894 [0.866, 0.909] | +0.005 [+0.002, +0.010], 7 changed predictions | 0.889 [0.861, 0.904] | +0.001 [0.000, +0.003], 1 changed |
-| L4 L3 + spaCy lemmas (vs L3) | 0.894 [0.868, 0.911] | +0.000 [−0.014, +0.016] | 0.881 [0.853, 0.896] | −0.008 [−0.024, +0.008] |
-| L5 L3 + protected stop words (vs L3) | 0.860 [0.828, 0.876] | **−0.034** [−0.058, −0.014] | 0.863 [0.830, 0.880] | **−0.026** [−0.045, −0.007] |
-| L6 L3 + generic stop words (vs L3) | 0.819 [0.784, 0.837] | **−0.074** [−0.102, −0.051] | 0.809 [0.774, 0.827] | **−0.080** [−0.105, −0.057] |
-| char_wb 2–5 on L3 (vs L3 words) | 0.895 [0.867, 0.910] | +0.002 [−0.019, +0.020] | 0.879 [0.850, 0.894] | −0.010 [−0.029, +0.010] |
-| word 1–2 + char_wb 2–5 on L3 (vs L3 words) | **0.923** [0.898, 0.936] | **+0.029** [+0.016, +0.046] | **0.909** [0.883, 0.923] | **+0.020** [+0.008, +0.034] |
+| L0 sklearn defaults on raw text | 0.882 [0.853, 0.898] | – | 0.876 [0.850, 0.892] | – |
+| L1 normalize + regex tokenizer (vs L0) | 0.888 [0.860, 0.904] | +0.006 [−0.005, +0.017] | 0.886 [0.862, 0.901] | +0.010 [−0.001, +0.022] |
+| L2 + negation/contractions (vs L1) | 0.889 [0.864, 0.904] | +0.000 [−0.019, +0.022] | 0.888 [0.864, 0.903] | +0.002 [−0.005, +0.008] |
+| L3 + number placeholder (vs L2) | 0.894 [0.869, 0.909] | **+0.005 [+0.002, +0.010]** | 0.888 [0.865, 0.904] | +0.001 [+0.000, +0.003] |
+| L4 L3 + spaCy lemmas (vs L3) | 0.894 [0.870, 0.911] | +0.000 [−0.014, +0.016] | 0.881 [0.856, 0.896] | −0.008 [−0.024, +0.008] |
+| L5 L3 + protected stop words (vs L3) | 0.859 [0.830, 0.876] | **−0.034 [−0.058, −0.014]** | 0.863 [0.832, 0.880] | **−0.026 [−0.045, −0.007]** |
+| L6 L3 + generic stop words (vs L3) | 0.819 [0.785, 0.837] | **−0.074 [−0.102, −0.051]** | 0.809 [0.776, 0.827] | **−0.080 [−0.105, −0.057]** |
+| char_wb 2–5 on L3 (vs L3 words) | 0.895 [0.867, 0.910] | +0.002 [−0.019, +0.020] | 0.879 [0.851, 0.895] | −0.010 [−0.029, +0.010] |
+| word 1–2 + char_wb 2–5 on L3 (vs L3 words) | 0.923 [0.902, 0.937] | **+0.029 [+0.016, +0.046]** | 0.909 [0.885, 0.923] | **+0.020 [+0.008, +0.034]** |
 
 ![ablation](figures/lexical_ablation.png)
 
@@ -48,12 +50,12 @@ Both families selected the same representation: L3 preprocessing, word 1–2-gra
 
 | Family | Classifier | `C` | Macro-F1 [95% CI] | Accuracy [95% CI] | Top-3 acc. | Fit time | Warm batch-one p50 / p95 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 | Logistic Regression | 100 | 0.923 [0.898, 0.936] | 0.921 [0.903, 0.938] | 0.967 | 15.0 s | 1.10 / 1.48 ms |
-| C2 | Linear SVM | 1 | 0.909 [0.883, 0.923] | 0.910 [0.891, 0.927] | 0.966 | 2.7 s | 1.23 / 2.27 ms |
+| C1 | Logistic Regression | 100 | 0.923 [0.902, 0.937] | 0.921 [0.903, 0.938] | 0.967 | 10.8 s | 1.18 / 1.42 ms |
+| C2 | Linear SVM | 1 | 0.909 [0.885, 0.923] | 0.910 [0.891, 0.927] | 0.966 | 2.4 s | 1.19 / 1.77 ms |
 
-`C` = 100 for C1 is the grid's upper edge, so the pre-registered edge rule fitted `C` = 1000 once; it scored 0.897 and was not adopted. Latency is from the sandbox and is only indicative; the `select` stage re-measures all four candidates on one machine. Saved models are about 20 MB each (`artifacts/models/`, not in git).
+`C` = 100 for C1 is the grid's upper edge, so the pre-registered edge rule fitted `C` = 1000 once; it scored 0.897 and was not adopted. Latency is the `select` stage measurement (all four candidates, same Windows laptop, CPU for TF-IDF). Saved models are about 20 MB each (`artifacts/models/`, not in git).
 
-The C1-vs-C2 gap (0.014) is within the overlap of their intervals; this partition cannot say that LR is better than SVM in general.
+~~The C1-vs-C2 gap (0.014) is within the overlap of their intervals; this partition cannot say that LR is better than SVM.~~ *Corrected:* overlapping marginal intervals are not a test of a difference between two models scored on the same requests. The paired bootstrap gives C1 − C2 = +0.014 [+0.003, +0.027] (p(Δ ≤ 0) = 0.005), so on this partition LR is better. That is still a selected-on-this-partition comparison, and on the official test set the order reverses (C2 − C1 = +0.004 [−0.002, +0.010]; see `results_full.md`).
 
 ## 4. Development error analysis (C1, model validation)
 
@@ -61,11 +63,9 @@ C1 makes 79 errors on 1,000 requests; the correct intent is in the top three for
 
 ![confusions](figures/C1_val_confusions.png)
 
-## 5. Not done yet
+## 5. Status
 
-- **C3/C4 (frozen MiniLM):** implemented and tested end to end with a stand-in encoder, but not run, because the Hugging Face hub was blocked in the sandbox. Run `python -m banking_nlp.experiments embeddings` on a team machine.
-- **Deployment freeze:** `select` needs all four candidates and measures latency on one machine.
-- **Routing threshold, difficulty slice, test scoring:** after the freeze, in that order.
+C3/C4, the deployment freeze, the routing threshold, the difficulty slice and the single test pass were completed on 7 November 2026; see [`results_full.md`](results_full.md).
 
 ## 6. Published results for context (not comparable)
 
