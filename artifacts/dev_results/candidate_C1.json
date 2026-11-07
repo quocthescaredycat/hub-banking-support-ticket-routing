@@ -1,0 +1,91 @@
+{
+  "family": "C1",
+  "config_id": "lr|word12+charwb25:L3_numbers|C=100",
+  "classifier": "lr",
+  "C": 100.0,
+  "representation": {
+    "kind": "word+char",
+    "variant": "L3_numbers",
+    "word_ngram": [
+      1,
+      2
+    ],
+    "char_ngram": [
+      2,
+      5
+    ]
+  },
+  "preprocessing": {
+    "name": "L3_numbers",
+    "tokenizer": "regex",
+    "contractions": true,
+    "lemmatize": false,
+    "numbers": "placeholder",
+    "stopwords": "none",
+    "description": "L2 + number placeholder."
+  },
+  "score_type": "probability (multinomial LR, uncalibrated)",
+  "n_fit_rows": 8003,
+  "n_features": 32369,
+  "val_metrics": {
+    "n": 1000,
+    "accuracy": 0.921,
+    "macro_precision": 0.9268221578010086,
+    "macro_recall": 0.9230531998771112,
+    "macro_f1": 0.9227113877299484,
+    "invalid_predictions": 0,
+    "top3_accuracy": 0.967
+  },
+  "val_ci": {
+    "macro_f1_ci": [
+      0.8984866423051093,
+      0.936286348031059
+    ],
+    "accuracy_ci": [
+      0.903,
+      0.938
+    ]
+  },
+  "fit_seconds": 15.04,
+  "converged": true,
+  "artifact": "artifacts/models/C1.joblib",
+  "artifact_sha256": "61816ce921513db1e7341ab611e19b0939aea0a46f5c1e55b39d7c1758e14707",
+  "artifact_bytes": 20645076,
+  "latency_this_machine": {
+    "n": 200,
+    "warmup": 20,
+    "p50_ms": 1.1037870000336625,
+    "p95_ms": 1.4821783498291552,
+    "mean_ms": 1.1722011099993779
+  },
+  "environment": {
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v300-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "timestamp_utc": "2026-11-07T02:40:38+00:00",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "spacy": "3.8.18",
+      "en_core_web_sm": "3.8.0",
+      "sentence-transformers": null,
+      "transformers": null,
+      "torch": null,
+      "joblib": "1.6.0",
+      "matplotlib": "3.11.2"
+    },
+    "git_commit": null
+  },
+  "config_hash": "b7938aa546ed",
+  "predictions": {
+    "family": "C1",
+    "class_order": "label_id 0..76 (label_mapping.json)",
+    "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
+    "score_type": "probability (multinomial LR, uncalibrated)",
+    "predictions_sha256": "8bafaba2eb4a1efe7ecafc97d819f9a01dbb4f49e44a86618f7922c2a3bf48e4",
+    "config_id": "lr|word12+charwb25:L3_numbers|C=100"
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "rows": 10003,
+  "labels_present": 77,
+  "empty_or_blank_texts": 0,
+  "texts_with_whitespace_irregularities": 464,
+  "multiline_texts": 10,
+  "non_ascii_characters": {
+    "U+00A3 POUND SIGN": 30,
+    "U+20AC EURO SIGN": 21,
+    "U+00A0 NO-BREAK SPACE": 2,
+    "U+2026 HORIZONTAL ELLIPSIS": 1
+  },
+  "length_words": {
+    "count": 10003.0,
+    "mean": 11.949415175447365,
+    "std": 7.8915768393189625,
+    "min": 2.0,
+    "5%": 5.0,
+    "50%": 10.0,
+    "95%": 29.0,
+    "max": 79.0
+  },
+  "length_chars": {
+    "count": 10003.0,
+    "mean": 59.47375787263821,
+    "std": 40.86790120711292,
+    "min": 13.0,
+    "5%": 26.0,
+    "50%": 47.0,
+    "95%": 151.89999999999964,
+    "max": 433.0
+  },
+  "label_frequency": {
+    "min": 35,
+    "max": 187,
+    "median": 127.0,
+    "least_frequent": {
+      "lost_or_stolen_card": 82,
+      "card_swallowed": 61,
+      "card_acceptance": 59,
+      "virtual_card_not_working": 41,
+      "contactless_not_working": 35
+    },
+    "most_frequent": {
+      "card_payment_fee_charged": 187,
+      "direct_debit_payment_not_recognised": 182,
+      "balance_not_updated_after_cheque_or_cash_deposit": 181,
+      "wrong_amount_of_cash_received": 180,
+      "cash_withdrawal_charge": 177
+    }
+  },
+  "exact_duplicates": {
+    "groups_with_duplicates": 4,
+    "rows_in_duplicate_groups": 8,
+    "conflicting_label_groups": 0,
+    "conflict_examples": [],
+    "duplicate_examples": [
+      {
+        "texts": [
+          "I can't seem to be able to use my card",
+          "\nI can't seem to be able to use my card\n\n\n"
+        ],
+        "labels": [
+          "card_not_working",
+          "card_not_working"
+        ]
+      },
+      {
+        "texts": [
+          "\nI put the wrong pin too many times and now it is blocked. Can you help me unblock it?",
+          "I put the wrong pin too many times and now it is blocked. Can you help me unblock it?"
+        ],
+        "labels": [
+          "pin_blocked",
+          "pin_blocked"
+        ]
+      },
+      {
+        "texts": [
+          "Where can I withdraw money from?",
+          "\nWhere can I withdraw money from?"
+        ],
+        "labels": [
+          "atm_support",
+          "atm_support"
+        ]
+      },
+      {
+        "texts": [
+          "Do I need to go to a physical bank to change my PIN?",
+          "\nDo I need to go to a physical bank to change my PIN?"
+        ],
+        "labels": [
+          "change_pin",
+          "change_pin"
+        ]
+      }
+    ]
+  },
+  "loose_duplicates": {
+    "groups_with_duplicates": 31,
+    "rows_in_duplicate_groups": 62,
+    "conflicting_label_groups": 1,
+    "conflict_examples": [
+      {
+        "text": "Has my top up gone through?",
+        "labels": [
+          "pending_top_up",
+          "top_up_reverted"
+        ],
+        "row_ids": [
+          "train-02002",
+          "train-03160"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "texts": [
+          "Why do I see an extra £1 charge on my statement?",
+          "Why do I see an extra €1 charge on my statement?"
+        ],
+        "labels": [
+          "extra_charge_on_statement",
+          "extra_charge_on_statement"
+        ]
+      },
+      {
+        "texts": [
+          "Why is there a $1 charge on my statement?",
+          "Why is there a €1 charge on my statement?"
+        ],
+        "labels": [
+          "extra_charge_on_statement",
+          "extra_charge_on_statement"
+        ]
+      },
+      {
+        "texts": [
+          "What are the auto-top up policies?",
+          "What are the auto top-up policies?"
+        ],
+        "labels": [
+          "automatic_top_up",
+          "automatic_top_up"
+        ]
+      },
+      {
+        "texts": [
+          "I can't seem to be able to use my card",
+          "\nI can't seem to be able to use my card\n\n\n"
+        ],
+        "labels": [
+          "card_not_working",
+          "card_not_working"
+        ]
+      },
+      {
+        "texts": [
+          "\nI put the wrong pin too many times and now it is blocked. Can you help me unblock it?",
+          "I put the wrong pin too many times and now it is blocked. Can you help me unblock it?"
+        ],
+        "labels": [
+          "pin_blocked",
+          "pin_blocked"
+        ]
+      },
+      {
+        "texts": [
+          "My top-up hasn't gone through",
+          "My top up hasn't gone through"
+        ],
+        "labels": [
+          "pending_top_up",
+          "pending_top_up"
+        ]
+      },
+      {
+        "texts": [
+          "Why hasn't my top up gone through?",
+          "Why hasn't my top-up gone through?"
+        ],
+        "labels": [
+          "pending_top_up",
+          "pending_top_up"
+        ]
+      },
+      {
+        "texts": [
+          "Has my top up gone through?",
+          "Has my top-up gone through?"
+        ],
+        "labels": [
+          "pending_top_up",
+          "top_up_reverted"
+        ]
+      },
+      {
+        "texts": [
+          "When will my top-up go through?",
+          "When will my top up go through?"
+        ],
+        "labels": [
+          "pending_top_up",
+          "pending_top_up"
+        ]
+      },
+      {
+        "texts": [
+          "My top-up is still pending",
+          "My top up is still pending"
+        ],
+        "labels": [
+          "pending_top_up",
+          "pending_top_up"
+        ]
+      }
+    ]
+  },
+  "near_duplicate_candidates": {
+    "rule": "word 1-2-gram TF-IDF cosine >= 0.9 on duplicate keys, pairs not already sharing a loose key",
+    "pairs": 108,
+    "pairs_with_same_label": 106,
+    "decision": "merged into duplicate groups for partitioning (near-verbatim copies); lower thresholds start pairing distinct intents, so they are not used",
+    "examples": [
+      {
+        "a": "My card payment didn't go through.",
+        "b": "Card payment didn't go through.",
+        "cosine": 0.978,
+        "labels": [
+          "declined_card_payment",
+          "declined_card_payment"
+        ]
+      },
+      {
+        "a": "Looks like my card payment was duplicated after all. I went to pay at the store earlier, got declined once, second time it works. App still stays pending for one of the payments. Can you please remove one of them as it's wrong and clearly was declined?",
+        "b": "Looks like my card payment was duplicated after all. I went to pay at the store earlier, got declined once,second time it works. App still stays pending for one of the payments. Can you remove one of them as it's wrong and clearly was declined?",
+        "cosine": 0.976,
+        "labels": [
+          "transaction_charged_twice",
+          "transaction_charged_twice"
+        ]
+      },
+      {
+        "a": "Would you please check my Card. As Withdrawal was working fine so far, but this morning suddenly got declined. Can you please check the problem?",
+        "b": "Please check my Card. As Withdrawal was working fine so far, but this morning suddenly got declined. Can you please check the problem?",
+        "cosine": 0.975,
+        "labels": [
+          "declined_cash_withdrawal",
+          "declined_cash_withdrawal"
+        ]
+      },
+      {
+        "a": "I bought something online a couple days ago, sent the money immediately online but the seller says it's still not there yet. How long do EU transfers actually take?",
+        "b": "How long do EU transfers actually take? I bought something online a couple days ago, sent the money immediately online but the seller says it's still not there yet.",
+        "cosine": 0.973,
+        "labels": [
+          "pending_transfer",
+          "pending_transfer"
+        ]
+      },
+      {
+        "a": "Money that I have transferred hasn't arrived yet",
+        "b": "The money that I have transferred hasn't arrived yet.",
+        "cosine": 0.973,
+        "labels": [
+          "balance_not_updated_after_bank_transfer",
+          "balance_not_updated_after_bank_transfer"
+        ]
+      },
+      {
+        "a": "I don't live in the UK. Can I still get a card?",
+        "b": "If I don't live in the UK, can I still get a card?",
+        "cosine": 0.971,
+        "labels": [
+          "country_support",
+          "country_support"
+        ]
+      },
+      {
+        "a": "How can I choose between Visa and Mastercard?",
+        "b": "Can I choose between Visa and Mastercard?",
+        "cosine": 0.97,
+        "labels": [
+          "visa_or_mastercard",
+          "visa_or_mastercard"
+        ]
+      },
+      {
+        "a": "Looks like my card payment was duplicated after all. I went to pay at the store earlier, got declined once, second time it works. App still stays pending for one of the payments. Can you please remove one of them as it's wrong and clearly was declined?",
+        "b": "Looks like my card payment was duplicated after all. I went to pay at the store earlier, got declined once,second time it works. App still stays pending for one of the payments. Can you please remove one of them as it's wrong and was declined?",
+        "cosine": 0.968,
+        "labels": [
+          "transaction_charged_twice",
+          "transaction_charged_twice"
+        ]
+      },
+      {
+        "a": "I just realized I made the wrong transaction yesterday. Would  you please make it correct?I need it by tomorrow Please.",
+        "b": "I just realized I made the wrong transaction  yesterday. Would  you please make it correct?I need it by tomorrow.",
+        "cosine": 0.967,
+        "labels": [
+          "cancel_transfer",
+          "cancel_transfer"
+        ]
+      },
+      {
+        "a": "Card payment still pending.",
+        "b": "My card payment still pending",
+        "cosine": 0.967,
+        "labels": [
+          "pending_card_payment",
+          "pending_card_payment"
+        ]
+      },
+      {
+        "a": "Can I open an account for my children?",
+        "b": "How can I open an account for my children?",
+        "cosine": 0.966,
+        "labels": [
+          "age_limit",
+          "age_limit"
+        ]
+      },
+      {
+        "a": "I need to top-up my card today urgently but my card keeps getting declined!! Can you please resolve this problem or let me know if you have any alternatives",
+        "b": "I really need to top-up my card today urgently but my card keeps getting declined!! Can you please resolve this problem or let me know if you have any alternatives",
+        "cosine": 0.962,
+        "labels": [
+          "top_up_failed",
+          "top_up_failed"
+        ]
+      },
+      {
+        "a": "How do I get a real card?",
+        "b": "Do I get a real card?",
+        "cosine": 0.962,
+        "labels": [
+          "order_physical_card",
+          "order_physical_card"
+        ]
+      },
+      {
+        "a": "How long do EU transfers take? I bought something online a couple days ago , sent the money immediately online but the seller says it is still not there yet",
+        "b": "How long do EU transfers take? I bought something online a couple of days ago , sent the money immediately online but the seller says it is still not there yet.",
+        "cosine": 0.962,
+        "labels": [
+          "pending_transfer",
+          "pending_transfer"
+        ]
+      },
+      {
+        "a": "How long does it actually take for a card payment to go through? There's one stuck since a couple days already that doesn't seem to move",
+        "b": "How long does it actually take for a card payment to go through? There's one stuck since a couple of days already that doesn't seem to move",
+        "cosine": 0.96,
+        "labels": [
+          "pending_card_payment",
+          "pending_card_payment"
+        ]
+      }
+    ]
+  }
+}

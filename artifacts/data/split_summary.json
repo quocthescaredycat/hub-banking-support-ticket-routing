@@ -1,0 +1,34 @@
+{
+  "counts": {
+    "fit": 8003,
+    "model_val": 1000,
+    "routing_val": 1000
+  },
+  "fractions": {
+    "fit": 0.8001,
+    "model_val": 0.1,
+    "routing_val": 0.1
+  },
+  "requested_fractions": {
+    "fit": 0.8,
+    "model_val": 0.1,
+    "routing_val": 0.1
+  },
+  "per_label_min": {
+    "fit": 28,
+    "model_val": 3,
+    "routing_val": 4
+  },
+  "per_label_max": {
+    "fit": 151,
+    "model_val": 18,
+    "routing_val": 19
+  },
+  "duplicate_groups": 9872,
+  "multi_row_groups": 115,
+  "largest_group_size": 5,
+  "pairs_cosine_0.85_or_more_across_partitions": 57,
+  "note": "pairs between 0.85 and 0.90 are allowed to cross partitions; many are minimal pairs with different intents",
+  "splits_csv_sha256": "2d1384376ca40af8807e73a62ba8f6fe8a7ba318a7dfaa902c963ba75206559e",
+  "config_hash": "b7938aa546ed"
+}

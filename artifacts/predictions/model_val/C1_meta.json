@@ -1,0 +1,8 @@
+{
+  "family": "C1",
+  "class_order": "label_id 0..76 (label_mapping.json)",
+  "row_order_checksum": "f7a98c11c981f7d4cab6f252dffe63b1619de2e3882febdbc84784f5b595bd2d",
+  "score_type": "probability (multinomial LR, uncalibrated)",
+  "predictions_sha256": "8bafaba2eb4a1efe7ecafc97d819f9a01dbb4f49e44a86618f7922c2a3bf48e4",
+  "config_id": "lr|word12+charwb25:L3_numbers|C=100"
+}
