@@ -1,8 +1,19 @@
 # BANKING77: customer request classification, routing, and similar-request retrieval
 
-Prepared: 3 November 2026.
+Prepared: 3 November 2026. Revised: 6 November 2026 to use native Hugging Face datasets and simple DistilBERT/RoBERTa training.
 
-Status: planning complete; implementation and experiments have not started. The user confirmed three people, four weeks, public data, and a local demo. This is a separate NLP course project. The existing EEG `PLAN.md`, code, checkpoints, and notebook outputs remain reference material.
+Status: EDA and C1–C4 load BANKING77 directly with `load_dataset("PolyAI/banking77")`. Native stratified splits contain 9,002 fitting and 1,001 model-validation requests. `training_transformer.ipynb` uses Hugging Face tokenizers/backbones, explicit `RoBERTa` and `DistilBERT` classes, and a PyTorch training loop, with optional 5/30 examples per intent. Full neural training and official test scoring have not run. The project has three people, four weeks, public data, and a local demo; the team lead owns the transformer/LoRA research.
+
+Historical validation results on the previous group-based CSV split from [comparison.csv](artifacts/training/comparison.csv), using the settings recorded in [run_info.json](artifacts/training/run_info.json):
+
+| System | Validation accuracy | Validation macro-F1 |
+| --- | --- | --- |
+| C1: TF-IDF + Logistic Regression | 90.91% | 0.9102 |
+| C2: TF-IDF + linear SVM | 91.01% | 0.9095 |
+| C3: frozen MiniLM + Logistic Regression | 93.31% | 0.9365 |
+| C4: frozen MiniLM + linear SVM | 92.81% | 0.9306 |
+
+C3 led that earlier experiment. The table above uses a different split and must not be compared directly with new native-split runs. New C1–C4 outputs are in `artifacts/training_hf`; keep all compared models on the same native split. These are development results, not official test scores. Lemmatization, near-duplicate auditing, routing, retrieval evaluation, and the transformer experiments remain outstanding.
 
 ## 1. Recommended project and boundaries
 
@@ -10,17 +21,22 @@ Build an agent-facing support workbench that accepts an English banking request,
 
 Research question: **How do lexical and pretrained sentence representations compare for fine-grained banking intent classification, similar-request retrieval, and routing with an option to request human review?**
 
+Team-lead research question: **On the same RoBERTa-base checkpoint and BANKING77 splits, how does LoRA compare with full fine-tuning in macro-F1, trainable parameters, memory use, and elapsed training time?** Llama is a secondary comparison across model families, not evidence that decoder architectures or LoRA are inherently better.
+
 The core project uses public BANKING77 requests as a simulated historical library. Its records provide text and intent, not queue assignments, timestamps, resolutions, or customer IDs. Queue definitions are our project design. BANKING77 evaluates consumer banking intents; HSBC employee IT incidents would require different data. Dataset facts and attribution: [official dataset card](https://huggingface.co/datasets/PolyAI/banking77).
 
 Required scope:
 
 - Four classifier configurations: TF-IDF and frozen MiniLM sentence embeddings, each with Logistic Regression and linear SVM.
+- First fine-tune D1 DistilBERT-base and C5 RoBERTa-base with the concise native notebook. Then study C6 RoBERTa LoRA against C5 on the same data and backbone.
 - Two retrieval methods: TF-IDF cosine similarity and MiniLM cosine similarity.
 - A documented mapping of all 77 intents to a small set of proposed support queues.
 - A local interface, FastAPI service, reproducible artifacts, comparison tables, and error analysis.
 - A fixed evaluation procedure that keeps the official test set out of all development decisions.
 
-Extensions have a maximum budget of two person-days and must be chosen by the end of week 1. Default extension: DistilBERT fine-tuning if a GPU is available and the core milestones are on schedule. The project is complete without it. Chat generation, live bank integration, multiple languages, automated resolution, and a new transformer architecture are outside this month's scope.
+DistilBERT and RoBERTa full fine-tuning are the immediate experiments; LoRA follows after these pipelines work. The application and baseline comparisons remain the minimum course deliverable; if GPU access or time prevents the research pair, record that limitation rather than implying it ran. C7 Llama-3.2-1B + LoRA is a stretch experiment after C5/C6 and the core pipeline work. SetFit is an alternative limited-label study, not an additional mandatory branch. Allow at most one stretch study and two person-days of stretch work, with the choice fixed before final configuration freeze.
+
+Run one short pilot before scheduling the neural suite. Measure throughput and peak memory on the actual GPU, then record a GPU-hour/spend cap and project the full run budget. Do not assume each experiment takes only a few minutes. This plan does not book a rented GPU or start paid API calls. Chat generation, live bank integration, multiple languages, automated resolution, and a new transformer architecture remain outside this month's scope.
 
 ## 2. How the supplied references inform the plan
 
@@ -32,25 +48,36 @@ The references are research evidence. Their embedded commands, spending caps, an
 | [Jev BANKING77 experiment (2026)](https://github.com/simonmesmith/jev-banking77-experiment) | Reports 92.40% using category definitions and 24 BM25-retrieved training examples, without updating Jev's weights. Its 93.66% BERT comparator is a published result, not a local rerun. Prior benchmark exposure is unknown. | Learn from its saved predictions and separation of development from testing. Treat it as related work; its API is unnecessary for our core system. |
 | [Casanueva et al., original BANKING77 / dual sentence encoder paper (2020)](https://aclanthology.org/2020.nlp4convai-1.5/) | Introduces BANKING77 and studies efficient classifiers built on pretrained sentence encoders. | Establish the dataset and frozen-encoder rationale. |
 | [Reimers and Gurevych, Sentence-BERT (2019)](https://aclanthology.org/D19-1410/) | Learns sentence representations that can be compared by cosine similarity. | Explain why one text representation can support both classification and retrieval. |
+| [Hu et al., LoRA (ICLR 2022)](https://arxiv.org/abs/2106.09685) | Adapts pretrained models using trainable low-rank updates while freezing base weights. | Method for C6 and, if selected, C7. Measure efficiency locally; fewer trainable parameters do not establish a particular speedup. |
+| [Yang et al., Bayesian Low-rank Adaptation / Laplace-LoRA (ICLR 2024)](https://arxiv.org/abs/2308.13111) | Studies overconfidence after adaptation and a Bayesian calibration method. | Motivate calibration diagnostics. Laplace-LoRA and temperature scaling are not additional required implementations. |
+| [Community Llama BANKING77 repository](https://github.com/rajo69/banking77-llama-1b-lora) and [model card](https://huggingface.co/rajo0113/banking77-llama-1b-lora) | Uses an instruction-tuned Llama model with generative labels and several adaptation techniques. The model card reports a 3,076-row evaluation split and its use for checkpoint selection. | Implementation reference only. Its data variant, output method, and test-informed checkpoint selection differ from our protocol; its reported score is not a controlled benchmark for C7. |
 
 Keep published results in a separate related-work table. Our train/development allocation differs from papers that fit on all official training examples. Do not claim a reproduced comparison, current state of the art, superiority, or equivalent performance from these numbers. The Jev repository's reported API costs are historical estimates, not a budget quote for a new run.
 
+Do not carry over unsupported claims that CNNs/LSTMs cannot be competitive, that no relevant peer-reviewed study exists, or that a larger decoder must beat an encoder. Excluding a model here is a scope decision. Record exact source revisions when reproducing any external setup.
+
 ## 3. Foundation model, custom model, or API?
 
-**Default: a pretrained text encoder with a small supervised classifier.** This transfers the frozen-encoder idea from CBraMod while keeping the implementation small.
+**Decision: retain the four baselines, run DistilBERT/RoBERTa through native Hugging Face APIs, then compare RoBERTa full fine-tuning with LoRA.** Using the same backbone makes the adaptation comparison interpretable. Comparisons against MiniLM or Llama also change model size, architecture, and pretraining, so they cannot isolate adaptation alone.
 
 | Option | Decision | Reason |
 | --- | --- | --- |
 | TF-IDF + Logistic Regression / linear SVM | Required | Cheap, interpretable lexical controls and two distinct classifier families. |
 | `sentence-transformers/all-MiniLM-L6-v2` + the same classifiers | Required | One frozen representation supports classification and search. Cache embeddings in stable row order. |
-| `distilbert/distilbert-base-uncased` with a new 77-class head | Optional, preferred GPU extension | A focused comparison of frozen features against end-to-end text fine-tuning. |
-| SetFit on the same MiniLM backbone | Alternative extension if the team chooses a few-shot research question | Choose instead of DistilBERT, with a bounded pair-sampling budget. It is not another required experiment. |
-| Custom CNN/LSTM/transformer from scratch | Omit from the committed scope | Token embeddings and masking would need new implementation; EEG weights do not provide a useful text initialization. |
+| D1: `distilbert/distilbert-base-uncased`, full fine-tuning | Immediate experiment | Smaller pretrained encoder; same split, label budgets, and training recipe as C5. |
+| C5: `FacebookAI/roberta-base`, full fine-tuning, new 77-class head | Main research comparison | Train the backbone and head; this is the reference for C6. |
+| C6: the same RoBERTa-base, LoRA plus fully trained 77-class head | Main research comparison | Keep backbone revision, data, head initialization per seed, and evaluation protocol aligned with C5. |
+| C7: `meta-llama/Llama-3.2-1B`, LoRA plus 77-class classification head | Stretch; not required | Compare a larger decoder-based classifier with the completed encoder systems, including memory and latency costs. |
+| Llama label generation / instruction prompting | Defer | Adds prompt, output-parsing, and class-score decisions to a project whose routing policy expects a score for every intent. |
+| SetFit on the same MiniLM backbone | Alternative to C7 if limited-label learning is chosen | Compare against frozen MiniLM and TF-IDF on identical small training subsets; bound pair sampling. |
+| Custom CNN/LSTM/transformer from scratch | Defer | Adds a separate architecture study and implementation effort without answering the chosen adaptation question. It is not required by the assignment. |
 | Jev or another hosted decision/LLM API | Related work by default | Adds a service dependency, usage accounting, and unknown pretraining exposure. A paid reproduction is a separate decision. |
 
 MiniLM produces 384-dimensional vectors; record its exact model revision, maximum input length, pooling, and embedding normalization. Start with the model's documented tokenizer and pooling. [MiniLM model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
 
-For the optional fine-tuning arm, start from the general pretrained DistilBERT checkpoint, not a BANKING77-fine-tuned checkpoint of uncertain provenance. Add the intent head and record every training setting. [DistilBERT model card](https://huggingface.co/distilbert/distilbert-base-uncased)
+For C5/C6, use a general pretrained RoBERTa checkpoint and initialize a new intent head; do not start from someone else's BANKING77-trained model. Pin the model/tokenizer revision. DistilBERT is a separate encoder comparison requested by the user, not a substitute for either member of the later RoBERTa/LoRA pair. [RoBERTa model card](https://huggingface.co/FacebookAI/roberta-base)
+
+For C7, use the base Llama checkpoint named above with a sequence-classification head; an instruction-tuned checkpoint would define a different experiment. The official Hugging Face model is gated and has the Llama 3.2 Community License. Model access must be available before C7 is scheduled; keep credentials out of notebooks and source control. If access is unavailable, defer C7 rather than silently switching models. [Llama model card](https://huggingface.co/meta-llama/Llama-3.2-1B)
 
 SetFit provides prompt-free few-shot training of sentence transformers; it is relevant only if limited-label learning becomes the chosen extension. [SetFit documentation](https://huggingface.co/docs/setfit/index)
 
@@ -58,32 +85,36 @@ SetFit provides prompt-free few-shot training of sentence transformers; it is re
 
 Use the official 10,003 training and 3,080 test examples, with the original 77 label names. Read the label mapping from dataset metadata; do not infer IDs from a separately ordered list. Preserve original capitalization and punctuation in canonical labels, while allowing friendly display names. Attribute BANKING77 under its published CC-BY-4.0 license. [Dataset source](https://huggingface.co/datasets/PolyAI/banking77)
 
-Every row carries `row_id`, `source_split`, `raw_text`, `label_id`, `label_name`, and `normalized_text_hash`. The hash is for duplicate auditing; it is not a customer ID. Keep raw text alongside any processed text.
+Load the native Hugging Face `DatasetDict` in each notebook. Read names from `ds["train"].features["label"].names`; keep its integer labels. Pandas is only for EDA and baseline result tables. No `data/processed` export, CSV reload, or separate `labels.json` is required.
 
-Before model fitting:
+Use these same calls in every notebook:
 
-1. Pin the dataset revision and checksum the source files. Record counts, missing values, lengths, label frequencies, and example samples from official training only.
-2. Define duplicate normalization as Unicode NFKC, case folding, and collapsed whitespace. Preserve negation and meaningful words. Record exact duplicates and conflicting labels. Keep duplicates in the same development partition; preserve conflicting source labels and document them.
-3. Divide official training into approximately 80% fitting, 10% model validation, and 10% routing-policy validation, using seed 42 and duplicate-group-aware stratification. Save the exact assignment before fitting; require all 77 classes in fitting and both development partitions. Record any group-size deviations from the requested proportions.
-4. Audit possible near duplicates within official training using a fixed rule and document decisions before freezing partitions. Do not group all requests with the same intent as one unit.
-5. Lock the official test set. Its examples and labels must not drive vocabulary fitting, category definitions, hyperparameters, retrieval selection, thresholds, or model revisions. A separate scoring function reads test answers after predictions are written.
+```python
+ds = load_dataset("PolyAI/banking77")
+split = ds["train"].train_test_split(test_size=0.1, stratify_by_column="label", seed=42)
+train_ds, valid_ds = split["train"], split["test"]
+```
 
-Use the three development partitions for distinct purposes:
+All 77 intents occur in each partition, with at least 30 fitting examples per intent. The former 80/10/10 allocation left one intent with only 28 fitting examples, so it could not support an exact 30-shot comparison. Keep the split seed fixed when changing training/sampling seeds. Native splitting is row-based: the current audit finds one normalized text shared by fitting/model-validation. Report this limitation; do not describe these partitions as duplicate-group-disjoint. Semantic near duplicates are also not excluded. Earlier CSV-based results remain historical; never combine their scores with native-split comparisons.
+
+Keep the official test set out of preprocessing fitting, model selection, few-shot sampling, retrieval development, and threshold selection. Hugging Face caches downloaded data itself. Record the dataset fingerprint and model revision with completed results.
+
+Current data usage:
 
 | Partition | Allowed use |
 | --- | --- |
-| Fitting, about 80% of official train | TF-IDF fitting, supervised model training, sentence-encoder fine-tuning if selected, and the retrieval library. |
+| Fitting, about 90% of official train | TF-IDF fitting, supervised model training, sentence-encoder fine-tuning if selected, and the retrieval library. |
 | Model validation, about 10% | Hyperparameter/model selection, epoch choice, preprocessing ablations, and development retrieval judgments. |
-| Routing-policy validation, about 10% | Select an abstention threshold for the already selected classifier. No architecture search here. |
+| Routing calibration, deferred | Before implementing automatic review, reserve independent training-origin data and retrain consistently, or specify an out-of-fold procedure. Do not tune and evaluate thresholds on the same validation rows. |
 | Official test | Final scores for the prespecified systems, locked robustness analysis, and final retrieval judgments. |
 
-**Default final procedure: do not refit before testing.** Evaluate the selected development-trained artifacts and the unchanged fitting-partition retrieval library. This preserves the validity of the routing threshold and keeps the implementation simple. Report the actual fitting count, so published full-training scores are not treated as controlled comparisons. A later all-training deployment refit is a separate artifact requiring its own calibration/validation procedure; do not attach the earlier measured score to it.
+**Default final procedure: do not refit before testing.** Evaluate the selected development-trained artifacts and the unchanged fitting-partition retrieval library. This keeps validation and final scoring separate. No routing threshold has been calibrated under the current split. Report the actual fitting count, so published full-training scores are not treated as controlled comparisons. A later all-training deployment refit is a separate artifact requiring its own calibration/validation procedure; do not attach the earlier measured score to it.
 
 After configuration freeze, report official train/test exact-duplicate overlap without changing the official test denominator. Optionally calculate a clearly labeled overlap-excluded sensitivity result from the same saved predictions. This public benchmark does not establish customer-disjoint or HSBC-specific performance.
 
 ## 5. Preprocessing and bounded experiments
 
-Implement three justified preprocessing techniques: text normalization, tokenization, and lemmatization. Preserve negation, transaction words, and numbers by default. Compare the classical baseline with and without lemmatization on model validation. The pretrained encoder receives lightly normalized original text and its own tokenizer; do not feed it stemmed text. Show examples and explain why preprocessing differs between representations.
+Keep the current light `clean_text()` as the default: Unicode/whitespace normalization with case, punctuation, numbers, and negation preserved. Tokenization belongs to the chosen representation. To complete the assignment's third preprocessing technique, add lemmatization as a separate TF-IDF ablation on model validation, not as a replacement for `text_clean`. Transformer models always receive the light text and their own tokenizer. Show a few examples and explain the different choices.
 
 Use the same fitting/development assignments for every model. TF-IDF vocabulary, IDF, and any learned feature transformations are fitted inside the training pipeline only. Do not fit them on a combined train/test corpus. Frozen encoder inference may be cached, but held-out embeddings must not become training examples or retrieval-library entries.
 
@@ -96,9 +127,29 @@ Use the same fitting/development assignments for every model. TF-IDF vocabulary,
 
 Use no class weighting initially; report class frequencies. Evaluate lemmatization on C1/C2, giving at most 24 lexical fits and six embedding-classifier fits. Record solver convergence and elapsed time. These small searches replace the EEG nested Optuna studies.
 
-Primary model-selection metric: validation macro-F1 over the fixed 77-label list. Tie rule: macro-F1 rounded to four decimals, then lower median warm batch-one latency on the same machine, then C1/C2/C3/C4 order. Keep seed 42 fixed; do not search for a favorable seed. Freeze the deployed classifier before opening test results. Score all four prespecified configurations once for the report; the test table must not select a different deployment model.
+Primary model-selection metric: validation macro-F1 over the fixed 77-label list. Tie rule: macro-F1 rounded to four decimals, then lower median warm batch-one latency on the same deployment machine, then C1–C7 order. Within a classical family, remaining ties prefer lower `C`, then the n-gram setting. The seed-42 run is the deployment candidate for each neural arm; do not choose the best seed. Freeze the deployed classifier before opening test results. Score each completed, prespecified system once for the report; the test table must not select a different deployment model. SetFit's separate few-shot results do not join this full-data selection.
 
-If DistilBERT is selected as the extension: maximum length 128 after inspecting training token lengths, batch size 16, AdamW weight decay 0.01, learning rate candidates {2e-5, 5e-5}, at most five epochs, and validation macro-F1 checkpoint selection with patience two. These are proposed starting settings, not a promise to reproduce the paper. Run a single-batch smoke check first; adjust batch size for memory before comparative runs, then record and freeze it. Use `[B, 77]` raw logits, integer class targets, and cross-entropy. Never flatten class logits or apply sigmoid. Do not assume classifier hidden states are suitable retrieval embeddings; keep MiniLM retrieval fixed. Name this arm C5: it joins deployment selection under the same split and metric rule only if completed before freeze, with last priority in the final tie-break order. A few-shot SetFit extension remains a separate learning-curve analysis rather than an implicitly comparable full-data candidate.
+### Transformer and LoRA experiments
+
+The notebook uses `AutoTokenizer`, `DataCollatorWithPadding`, and PyTorch `DataLoader`. Select `distilbert/distilbert-base-uncased` or `FacebookAI/roberta-base` with one checkpoint variable. `model_lib.py` defines two `nn.Module` classes: `DistilBERT` selects `[CLS]` and uses a dense/ReLU/dropout/linear head; `RoBERTa` selects `<s>` and uses a dropout/dense/tanh/dropout/linear head. Both return 77 logits and fine-tune every backbone/head parameter. The notebook explicitly shows cross-entropy, backpropagation, gradient clipping, AdamW, scheduling, validation, and checkpoint selection. Softmax is applied when displaying inference probabilities. [Native PyTorch training reference](https://huggingface.co/docs/transformers/v4.40.2/training)
+
+Starting recipe from [Qi et al., §4](https://arxiv.org/html/2012.03929v2): AdamW, learning rate `4e-5`, weight decay `0.01`, batch size 32, maximum length 128, linear decay, 10% warmup. Use dynamic padding and select the best validation macro-F1 checkpoint. The scheduler warms up for `ceil(0.1 * epochs * len(train_loader))` updates. Use BF16 autocasting on supported CUDA GPUs; otherwise FP32. The current loop uses batch size 32 without gradient accumulation. The first configuration cell exposes checkpoint, label budget, seeds, batch size, learning rate, weight decay, epochs, maximum length, warmup ratio, gradient clipping, classifier-head dropout, and BF16. These values feed the loaders, model, optimizer, scheduler, and training loop directly.
+
+| Training budget | Labeled fitting examples | Epochs |
+| --- | --- | --- |
+| 5 per intent | 385 | 50 |
+| 30 per intent | 2,310 | 18 |
+| All fitting rows | 9,002 | 5 |
+
+Few-shot subsets are nested at a fixed sampling seed, drawn only from fitting rows, with unchanged validation. These runs measure label efficiency; extra epochs compensate for fewer updates per epoch, not for missing information. Our validation holdout and checkpoint selection differ from the paper's full-data protocol, so this is not an exact reproduction. Start with one full-fitting run per backbone, then run the label-budget comparison if desired. Repeating sampling/training seeds 42/43/44 measures their combined variability; keep the split at seed 42.
+
+After full fine-tuning works, add C6 RoBERTa LoRA (`r=16`, `alpha=32`, dropout `0.1` on query/value projections, head fully trained), with learning rates `{1e-4, 3e-4}`. Use the same full-data epoch cap, effective batch size, split, backbone revision, and paired head initialization as C5; report unequal compute honestly. C7 Llama remains a separate stretch option with a declared pilot/budget, not part of the current notebook.
+
+Before the comparative runs, check that the intended adapter modules and head are trainable, log total/trainable parameter counts, and verify a saved/reloaded checkpoint reproduces predictions. For RoBERTa, explicitly save the full `classifier` head alongside adapters; for Llama, save its `score` head. Confirm names against the loaded architecture rather than assuming a generic target list. If merging adapters for inference, verify merged and unmerged logits agree within the chosen precision before measuring latency. [PEFT LoRA documentation](https://huggingface.co/docs/peft/en/package_reference/lora)
+
+If C7 is selected later, specify its learning-rate candidates and budget after a pilot, using the same split and checkpoint-selection rule. Use `AutoModelForSequenceClassification`, not label generation. Configure a pad token and attention masks, and verify that the class logits for an example agree when processed alone and in a padded batch. Use a valid final non-padding token representation. Start without quantization; if the pilot requires QLoRA, record it as C7-QLoRA and document the changed precision/memory setup rather than treating it as the same arm. [Llama implementation documentation](https://huggingface.co/docs/transformers/en/model_doc/llama)
+
+Keep MiniLM retrieval fixed: a fine-tuned classification model is not automatically a suitable retrieval encoder. C5/C6 and optional C7 join deployment selection only when completed, reloadable, and benchmarked on the common deployment machine before configuration freeze.
 
 ## 6. Retrieval, routing, and the interface
 
@@ -122,13 +173,15 @@ Resolve disagreements after saving both original judgments. Primary retrieval re
 
 ### Routing
 
+Future application work: the current 90/10 notebooks train intent classifiers only. Add independent routing calibration data (and retrain consistently) before implementing the threshold procedure below; there is no reserved routing split today.
+
 Create a versioned `intent_to_queue` mapping covering each canonical intent exactly once. Start with proposed queues such as Cards, Transfers, Cash/ATM, Top-ups, Account/Identity, and Disputes; determine the final inventory by inspecting fitting-partition examples. All names are illustrative project queues. The user's banking experience helps review the taxonomy, without importing private bank data.
 
 Keep intent prediction and queue assignment visible separately. Do not route from label names alone: inspect training examples for ambiguous names. Evaluate top-one intent accuracy and queue accuracy, since a wrong intent can still map to the correct queue.
 
 For the chosen classifier, use the top-one minus top-two score margin as an uncertainty signal. On routing-policy validation, choose the threshold with greatest coverage subject to at most 5% observed intent errors and at least 100 automatically routed requests; ties prefer the larger threshold. If none qualifies, retain category suggestions and route all requests to review. These are demonstration criteria, not a guaranteed operational error rate. Freeze the threshold before testing and report test coverage and error rate among routed requests.
 
-LR probability estimates and SVM decision scores must be labeled appropriately; do not convert SVM margins into percentages or claim calibration. A calibrated-probability feature would need a separate training-only calibration procedure and is optional. Review is an application state, not an invented 78th dataset intent. Unknown and multi-intent messages remain a stated limitation of this single-label benchmark.
+LR probability estimates, neural softmax scores, and SVM decision scores must be labeled appropriately. Neural logits are converted to softmax scores for the top-two margin; SVM uses its decision values. Thresholds are model-specific: do not transfer the C3 threshold to C5/C6/C7 or interpret a score as a demonstrated operational probability. A calibrated-probability feature would need a separate calibration procedure and is optional. Review is an application state, not an invented 78th dataset intent. Unknown and multi-intent messages remain a stated limitation of this single-label benchmark.
 
 ### Minimal application
 
@@ -151,86 +204,75 @@ Classification results: accuracy, macro precision/recall/F1, per-intent support 
 
 Efficiency results: fit time, embedding/index build time, artifact size, and warm batch-one latency p50/p95 measured over the same fixed validation inputs on the same hardware. Report end-to-end API latency separately from model prediction latency; precomputing embeddings moves work to an offline stage rather than eliminating it. Freeze warmup and repetition counts before measurement.
 
+For C5/C6 and optional C7, also record total/trainable parameters, peak GPU memory, GPU model, training precision, actual optimizer steps, and GPU-hours. Separate shared model-download/encoding costs from classifier fitting. Repeat the existing latency procedure (20 fixed validation texts, five warmups, three passes) for all finalists on one deployment machine. Keep CPU and GPU timing tables separate; synchronize GPU work when timing it. Record whether LoRA is merged. Do not compare the saved C1–C4 CPU numbers directly with new GPU numbers or assume LoRA is faster solely because it trains fewer parameters.
+
+For the neural research pair, add diagnostic negative log-likelihood and top-label expected calibration error using 15 fixed equal-width confidence bins on `[0, 1]`; record the bin convention. Compute them on model validation and, after prediction freeze, official test predictions. This measures calibration without fitting a calibration model. Temperature scaling and Laplace-LoRA are deferred: introducing either needs an independent calibration allocation or an out-of-fold procedure, not fitting a temperature and claiming independent calibration quality on those same rows. Independent routing calibration remains future work; the current notebook has no routing holdout.
+
 Required robustness slice: fit an auxiliary TF-IDF vocabulary on fitting texts and build one concatenated text profile per intent. After test predictions are locked, select the five test requests per true intent least similar to that intent's fitting profile. Report accuracy and macro-F1 on the resulting 385 requests. True test labels are used only for offline slice scoring. Call this a **prespecified lexical-difficulty slice inspired by Qi et al.**, not an independent test set or exact reproduction; lexical rarity alone does not establish semantic or real-world robustness. Freeze the tokenization and selection rule before testing. [Paper's evaluation design](https://arxiv.org/html/2012.03929v2)
 
-Optional few-shot experiment: only if chosen in week 1, compare the two LR representations using 5 and 30 fitting examples per intent. Use nested subsets and three fixed sampling seeds, the same validation queries, and no held-out retrieval examples. Fit each lexical vocabulary/IDF and classifier using only that sampled subset; frozen pretrained embeddings remain unchanged. If SetFit is the chosen extension, its supervised pairs also come only from the sampled subset. Report it as a development learning curve. Do not add an unbounded model search or combine it with every other extension.
+Optional SetFit study, chosen instead of C7: compare TF-IDF + LR, frozen MiniLM + LR, and SetFit on the same MiniLM backbone using 5 and 30 fitting examples per intent. Use nested subsets and sampling seeds 42/43/44, fixed training seed 42, the same model-validation queries, and no held-out pairs. Fit each lexical vocabulary/IDF and classifier only on its sampled subset. Bound SetFit to at most 10,000 sampled pairs and 200 encoder optimizer steps per fit; log the actual sampling settings and steps. Use one prespecified configuration per method, not a full-data winner's tuned settings presented as a few-shot-only experiment. Report a separate development learning curve and label the sampling variability. Keep this study outside the full-data deployment ranking.
 
 Save raw predictions with row ID, label, prediction, class ordering, scores, queue, review decision, and retrieved IDs. Save configuration hashes, data/split manifests, label/queue mapping, model/tokenizer revisions, dependencies, training history, and source version. Save TF-IDF and classifier together. Save cached embeddings with row-order checksums. No final score is reported until it has been recomputed from persisted predictions.
 
 Report factual observations, including when TF-IDF wins. Published benchmark exposure is possible for pretrained encoders; document available training-data disclosures. Results support this benchmark and prototype, not verified HSBC deployment performance.
 
-## 8. Reusing the EEG work responsibly
+## 8. Implementation style
 
-Inspected references: [model_lib.py](model_lib.py), [training_vast30OctStandardCNN.ipynb](training_vast30OctStandardCNN.ipynb), [training.py](training.py), and [training_cnn_tuning.py](training_cnn_tuning.py). Reuse selected patterns in a new NLP project; keep the EEG sources intact.
+Keep code concise and notebook-driven, following the user's explicit preference. Match the healthcare project's separation: `model_lib.py` contains architecture classes only; `training.py` holds the baseline workflow helpers, and training notebooks handle experiments and the explicit neural training loop. Reuse generic experiment habits from the EEG work (fixed seeds, saved checkpoints, validation-based selection), not its architectures or preprocessing. No custom framework, broad Optuna study, or new from-scratch architecture is needed for this research question.
 
-| EEG knowledge/code | BANKING77 use |
-| --- | --- |
-| Frozen CBraMod/REVE encoder and classifier | Frozen text encoder and supervised intent classifier; none of the EEG weights transfer. |
-| Editable variables and direct notebook function calls | A new notebook controls data preparation, bounded experiments, evaluation, and optional fine-tuning. |
-| Seed/config/result persistence | Reuse the pattern and small generic helpers such as `save_json`; replace EEG-specific metadata. |
-| Train-only normalization discipline | Train-only TF-IDF fitting and any learned embedding adaptation. |
-| Early stopping and saved best model | Optional DistilBERT validation macro-F1 checkpoint selection. |
-| Participant-disjoint reasoning | Duplicate-text-aware development partitions; no fictional customer groups. |
-| Confusion matrices and held-out predictions | Multiclass and retrieval error analysis. |
+Use a standard Transformers/PEFT training implementation with an explicit 77-class head, integer labels, attention masks, and the native dataset splits. A single-batch training smoke check must verify finite loss, gradients in the intended parameters, and `[B, 77]` outputs before each new arm. Text explanations can begin with TF-IDF feature contributions and retrieved examples; retrieved examples provide context, not a faithful explanation of neural internals.
 
-Do not copy the selected notebook's training loop verbatim. Cell 5 uses binary sigmoid metrics, flattened logits, float labels, unconditional CUDA AMP, and equally averaged batch losses. Its Optuna objective selects only the first grouped split with `next(...)`. Those assumptions do not implement this NLP protocol. If a neural loop is needed, use integer token IDs/targets, attention masks, 77 logits, conditional AMP, sample-weighted epoch loss, and the explicit development split. The existing EEG image Transformer is not a pretrained language model.
+## 9. Project structure
 
-MNE filtering, channel normalization, spectrogram augmentation, electrode positions, participant logit averaging, and EEG SHAP machinery are not NLP dependencies. Neither EEG nested CV nor the EEG full-data SHAP refit stage is required here. Text explanations can begin with TF-IDF feature contributions and retrieved examples; retrieved examples are contextual evidence, not a faithful explanation of the classifier's internal computation.
-
-## 9. Proposed independent project structure
-
-The following is a future layout, not files created by this planning task. Use a separate project directory/repository; a `banking77/` subdirectory is acceptable during development. Imports must not download data, fit models, or start services.
+Keep the working files and add only what the next experiment needs. The transformer notebook is implemented; full pretrained neural runs remain to be executed. Imports must not download data, fit models, or start services. Split helpers into more modules only when reuse makes that clearer.
 
 ```text
-banking77/
+hub-banking-support-ticket-routing/
   README.md
-  requirements.txt
-  notebooks/banking77_experiments.ipynb
-  banking_nlp/
-    data.py              # source provenance, label mapping, duplicate audit, splits
-    preprocessing.py     # normalization, tokens, classical lemmatization
-    models.py            # lexical/embedding classifiers; optional text fine-tuning
-    evaluation.py        # multiclass, queue, retrieval, difficulty-slice metrics
-    retrieval.py         # exact reference search and Qdrant adapter
-    routing.py           # queue mapping, margin score, review policy
-    artifacts.py         # manifests, hashes, model/prediction persistence
-    api.py               # inference and feedback operations
-  app.py                 # Streamlit interface
-  configs/               # run settings and reviewed queue taxonomy
-  artifacts/             # generated models, manifests, embeddings, predictions
-  report/                # experiment tables, figures, report, contribution table
-  tests/                 # only focused contract and integration checks
-  Dockerfile
-  compose.yaml
+  PLAN.md
+  preprocess.ipynb          # EDA, light cleaning, native split demonstration
+  training.ipynb            # existing C1–C4; add bounded lexical ablation
+  model_lib.py              # classifier architectures only (__init__ and forward)
+  training_transformer.ipynb # PyTorch batch loop; DistilBERT/RoBERTa; 5/30/all budgets
+  training.py               # baseline construction, fitting, metrics, prediction, latency
+  data/processed/           # legacy exports; no longer used by the notebooks
+  artifacts/training/       # historical grouped-split results
+  artifacts/training_hf/    # baseline outputs using native HF splits
+  artifacts/transformer/    # per-model/budget/seed PyTorch checkpoints, tokenizer, history
+  app.py / api.py           # planned local demonstration
+  retrieval.py / routing.py # planned application functions
+  report/                  # comparison tables, figures, and contribution table
 ```
 
-Useful checks during implementation: all 77 labels round-trip correctly; development duplicate groups are disjoint; preprocessing cannot fit on held-out data; saved pipeline reload reproduces predictions; retrieval IDs belong only to the fitting library; a query cannot retrieve itself; every intent has one queue; inference imports have no side effects; blank requests are handled; a neural extension preserves token/label dtypes and `[B,77]` outputs. No full training is required merely to check these contracts.
+Useful checks during implementation: all 77 labels round-trip correctly; duplicate overlap is reported; preprocessing cannot fit on held-out data; saved pipeline reload reproduces predictions; retrieval IDs belong only to the fitting library; a query cannot retrieve itself; every intent has one queue; inference imports have no side effects; blank requests are handled; a neural extension preserves token/label dtypes and `[B,77]` outputs. No full training is required merely to check these contracts.
 
 ## 10. Four-week work allocation and gates
 
 Planning estimate: 8-12 hours per person per week, or 96-144 total person-hours. These are effort estimates, not measured training times. Use relative weeks; the actual course deadline remains on the LMS.
 
-| Week | Member A: data/evaluation, suggested user role | Member B: modeling | Member C: application/retrieval | Exit gate |
+| Week | Member A: team lead, transformer/LoRA research | Member B: data, baselines, evaluation | Member C: application/retrieval | Exit gate |
 | --- | --- | --- | --- | --- |
-| 1 | Dataset audit, frozen manifests, training-only taxonomy review, preprocessing rationale | C1/C2 working, multiclass metrics, define bounded search | Request/result mockup, API contract, direct retrieval prototype | Data checks pass; one reproducible baseline; queue draft; extension choice recorded. |
-| 2 | Verify all comparisons use identical splits; define retrieval rubric and difficulty slice | C3/C4, all required validation results; optional extension only if core is complete | Qdrant and R1/R2 parity; integrate prediction and similar requests | Four classifier configurations and both retrievers work; candidate selection evidence saved. |
-| 3 | Development relevance ratings, routing-policy evaluation, draft errors and report | Freeze selected classifier, optional extension completed or dropped, save artifacts | Review controls, correction store, API integration, demo rehearsal | Model, retrieval, queue mapping, thresholds, and final scoring rules locked. |
-| 4 | Final retrieval ratings, tables/figures, report and contribution table | One final scoring pass per prespecified system; verify saved predictions | Docker packaging, startup instructions, demo rehearsal | Complete submission and reproducible local demonstration. |
+| 1 | Review RoBERTa/LoRA, pin checkpoint, run smoke checks and a GPU pilot, bound research budget | Verify existing C1–C4 artifacts/splits, close data-audit gaps, add the lexical lemmatization ablation | Request/result mockup, queue draft, direct retrieval prototype | Baselines verified; C5/C6 setup and budget feasible; third preprocessing technique documented. |
+| 2 | Finish C5/C6 learning-rate selection and seed repeats; record efficiency and errors | Check metrics and shared partitions; define difficulty slice and retrieval rubric | Qdrant and R1/R2 parity; integrate prediction and similar requests | Research pair completed or limitation recorded; both retrievers work. Decide whether there is capacity for C7 or SetFit. |
+| 3 | Finish the single selected stretch study or defer it; write research comparison and help freeze model choice | Development retrieval ratings, routing threshold, saved-prediction checks | Review controls, correction store, API integration, demo rehearsal | Model, retrieval, queue mapping, thresholds, and final scoring rules locked. |
+| 4 | Analyze locked final results, document tradeoffs and research contribution | Final scoring for prespecified artifacts, retrieval ratings, tables/figures | Packaging, startup instructions, demo rehearsal | Complete submission and reproducible local demonstration. |
 
 All members review error analysis and can explain the final system. Member A and B perform the independent relevance judgments; Member C prepares blinded rating sheets and handles integration. Track meetings and actual contributions for the assignment; do not invent fixed contribution percentages in advance.
 
-Stop rules: if baselines/data checks are incomplete after week 1, drop all model extensions. If the full local API does not work by the end of week 2, prioritize integration over new experiments. If Qdrant blocks progress, use verified exact search to keep the demo working and document Qdrant as deferred. After freeze, UI fixes may continue; prediction changes require a new recorded experiment and cannot be described as untouched testing after inspecting test errors.
+Stop rules: if baseline/data gaps remain after week 1, resolve them before comparative neural training. If C5/C6 are incomplete or the core app is not working by the end of week 2, drop C7/SetFit and finish the research pair plus integration. If the research pair itself exceeds the recorded time/GPU cap, stop expansion and report the completed work without invented results. If Qdrant blocks progress, use verified exact search and document Qdrant as deferred. After freeze, UI fixes may continue; prediction changes require a new recorded experiment and cannot be described as untouched testing after inspecting test errors.
 
 ## 11. Assignment fit and completion checklist
 
 Source: [course assignment](mlAssignments_v1.1_english.pdf), previously reviewed in this conversation. The report must describe the data, pipeline, experiments, results, and errors; the demo supports the scientific work.
+
+The assignment explicitly lists Sentence-BERT under representations (§4.3) and BERT under models (§4.4). It does not require a novel architecture or training from scratch. C5/C6 are our chosen research contribution, not additional instructor-mandated models; LoRA is not itself a different base architecture.
 
 | Requirement | Planned evidence |
 | --- | --- |
 | Data collection/description | Public source, revision, sizes, class distribution, example messages, duplicate audit. |
 | At least three preprocessing techniques | Normalization, tokenization, lemmatization, with motivations and a bounded ablation. |
 | At least two representations | TF-IDF and pretrained sentence embeddings. |
-| At least two models | Logistic Regression and linear SVM; optional DistilBERT separately labeled. |
+| At least two models | Logistic Regression and linear SVM cover this minimum; the RoBERTa pair adds a transformer/adaptation study. |
 | Evaluation and analysis | Macro metrics, confusion matrix, model comparisons, retrieval judgments, routing coverage/errors, difficulty slice. |
 | Source code and report | Reproducible notebook/modules, saved outputs, related work, limitations, contribution table. |
 | Optional demonstration | Local request form, routing decision, similar requests, correction recording. |
@@ -238,6 +280,9 @@ Source: [course assignment](mlAssignments_v1.1_english.pdf), previously reviewed
 Definition of done:
 
 - [ ] All required model and representation comparisons have actual saved results.
+- [ ] C5/C6 share the recorded backbone, splits, head initialization, and budget protocol; any missing research arm is explicitly documented.
+- [ ] Any C7 or SetFit study is separately identified, bounded, and completed before final evaluation decisions are frozen.
+- [ ] Three justified preprocessing techniques are implemented, including the separate lexical lemmatization comparison.
 - [ ] All 77 canonical intents map correctly through the model, API, and queue taxonomy.
 - [ ] The official test set did not select preprocessing, models, thresholds, examples, or retrieval settings.
 - [ ] The two retrieval methods are evaluated independently of intent classification.
@@ -248,4 +293,4 @@ Definition of done:
 - [ ] A fresh local environment can load the artifacts and demonstrate the complete workflow.
 - [ ] The report cites the sources and separates our measurements from published benchmarks.
 
-No target accuracy is a condition of completion. A trustworthy comparison and working application are the deliverables. The next implementation milestone is a separate BANKING77 notebook with the data audit, fixed splits, and one TF-IDF baseline.
+No target accuracy is a condition of completion. A trustworthy comparison and working application are the deliverables. The next experiment is a full DistilBERT run, followed by RoBERTa using the same native notebook and splits. Then compare 5/30/all fitting budgets or add the paired RoBERTa LoRA experiment. Do not add every candidate family at once.

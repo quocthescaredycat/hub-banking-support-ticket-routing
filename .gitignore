@@ -211,6 +211,11 @@ tempCodeRunnerFile.py
 # Downloaded resources for notebook lemmatization
 data/nltk_data/
 
+# Generated training models, embeddings, and reports
+artifacts/training/
+artifacts/training_hf/
+artifacts/transformer/
+
 # PyPI configuration file
 .pypirc
 
