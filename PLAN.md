@@ -1,5 +1,7 @@
 # BANKING77: customer request classification, routing, and similar-request retrieval
 
+> **14 November 2026:** [SPEC.md](SPEC.md) is now the current two-phase implementation specification. It selects React/TypeScript, FastAPI, PostgreSQL for application records, Qdrant for vector retrieval and local Docker Compose delivery, and updates the research priorities, evaluation protocol and evidence status. The material below is retained as historical research planning; its older stack, mandatory extensions and statements that no transformer test run exists are superseded. [CV_PROJECT.tex](CV_PROJECT.tex) contains the current in-progress CV entry.
+
 Prepared: 3 November 2026. Revised: 6 November 2026 to use native Hugging Face datasets and simple DistilBERT/RoBERTa training.
 
 Status: EDA and C1–C4 load BANKING77 directly with `load_dataset("PolyAI/banking77")`. Native stratified splits contain 9,002 fitting and 1,001 model-validation requests. `training_transformer.ipynb` uses Hugging Face tokenizers/backbones, explicit `RoBERTa` and `DistilBERT` classes, and a PyTorch training loop, with optional 5/30 examples per intent. Full neural training and official test scoring have not run. The project has three people, four weeks, public data, and a local demo; the team lead owns the transformer/LoRA research.
